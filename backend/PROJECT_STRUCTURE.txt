@@ -1,0 +1,144 @@
+factorypulse-backend/
+│
+├── src/
+│   ├── config/
+│   │   ├── database.js              # Database connections (MongoDB & PostgreSQL)
+│   │   └── corsConfig.js            # CORS middleware configuration
+│   │
+│   ├── controllers/
+│   │   └── sensorDataController.js  # HTTP request handlers for sensor APIs
+│   │
+│   ├── models/
+│   │   └── SensorData.js            # Mongoose & Sequelize models (dual DB support)
+│   │
+│   ├── services/
+│   │   ├── thingSpeakService.js     # Scheduled ThingSpeak data fetching
+│   │   └── sensorDataService.js     # Business logic for sensor data operations
+│   │
+│   ├── routes/
+│   │   └── sensorDataRoutes.js      # API route definitions (/api/data/*)
+│   │
+│   └── server.js                    # Main application entry point
+│
+├── .env                             # Environment variables (DB config, API keys)
+├── .gitignore                       # Git ignore file
+├── package.json                     # NPM dependencies and scripts
+├── README.md                        # Complete documentation
+├── SETUP.md                         # Quick setup guide
+├── SPRING_TO_MERN_MAPPING.md       # Spring Boot comparison
+└── PROJECT_STRUCTURE.txt            # This file
+
+═══════════════════════════════════════════════════════════════════════════
+
+KEY FILES EXPLAINED:
+
+📄 .env
+   - Database selection (DB_TYPE: mongodb or postgresql)
+   - MongoDB Atlas connection string
+   - PostgreSQL credentials
+   - ThingSpeak API URL and key
+   - CORS allowed origins
+
+📄 src/config/database.js
+   - MongoDB connection using Mongoose
+   - PostgreSQL connection using Sequelize
+   - Auto-initialization based on DB_TYPE
+   - Connection pooling and error handling
+
+📄 src/config/corsConfig.js
+   - CORS middleware setup
+   - Allowed origins from environment
+   - HTTP methods configuration
+
+📄 src/models/SensorData.js
+   - Mongoose schema for MongoDB
+   - Sequelize model for PostgreSQL
+   - Factory function to get correct model based on DB_TYPE
+   - Fields: temperature, vibration, current, timestamp
+
+📄 src/services/thingSpeakService.js
+   - Fetches data from ThingSpeak API every 60 seconds
+   - Uses node-cron for scheduling
+   - Parses JSON response (field1, field2, field3)
+   - Saves to database (works with both MongoDB & PostgreSQL)
+
+📄 src/services/sensorDataService.js
+   - getRecentData(): Returns latest sensor reading
+   - getAllData(): Returns all sensor readings (sorted by timestamp)
+   - convertToDto(): Transforms database objects to DTOs
+   - Database-agnostic (works with both DBs)
+
+📄 src/controllers/sensorDataController.js
+   - getRecentSensorData(): Handles GET /api/data/recent
+   - getAllSensorData(): Handles GET /api/data/all
+   - Error handling and HTTP status codes
+
+📄 src/routes/sensorDataRoutes.js
+   - Defines API routes
+   - Maps routes to controller methods
+   - Mounted at /api/data in server.js
+
+📄 src/server.js
+   - Express app initialization
+   - Middleware setup (CORS, JSON parsing)
+   - Route mounting
+   - Database initialization
+   - ThingSpeak service startup
+   - Health check endpoint
+   - Graceful shutdown handling
+
+═══════════════════════════════════════════════════════════════════════════
+
+API ENDPOINTS:
+
+✅ GET /health
+   Response: Server status and database type
+
+✅ GET /api/data/recent
+   Response: Latest sensor reading (temperature, vibration, current, timestamp)
+
+✅ GET /api/data/all
+   Response: Array of all sensor readings (sorted by timestamp ASC)
+
+═══════════════════════════════════════════════════════════════════════════
+
+DATA FLOW:
+
+1. ThingSpeak → Backend
+   ⏰ Every 60 seconds, thingSpeakService fetches data
+   📡 Axios GET request to ThingSpeak API
+   💾 Saves to database (MongoDB or PostgreSQL)
+
+2. Frontend → Backend
+   🌐 React app calls /api/data/recent or /api/data/all
+   🔄 Controller → Service → Model → Database
+   📤 Returns JSON response
+
+3. Database Operations
+   📥 Insert: New sensor readings from ThingSpeak
+   📊 Query: Recent data (DESC by timestamp, limit 1)
+   📈 Query: All data (ASC by timestamp)
+
+═══════════════════════════════════════════════════════════════════════════
+
+TECHNOLOGY STACK:
+
+Backend Framework:     Express.js
+Database (Option 1):   MongoDB Atlas (Cloud)
+Database (Option 2):   PostgreSQL (Local)
+ORM (MongoDB):         Mongoose
+ORM (PostgreSQL):      Sequelize
+HTTP Client:           Axios
+Scheduling:            node-cron
+CORS:                  cors middleware
+Environment Config:    dotenv
+
+═══════════════════════════════════════════════════════════════════════════
+
+COMMANDS:
+
+Install dependencies:   npm install
+Run (development):      npm run dev
+Run (production):       npm start
+
+═══════════════════════════════════════════════════════════════════════════
