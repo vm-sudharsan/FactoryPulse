@@ -132,7 +132,7 @@ const NotificationBell = () => {
                     
                     {notification.isAcknowledged && (
                       <span className="notification-acknowledged">
-                        ✓ Acknowledged
+                        Acknowledged
                       </span>
                     )}
                   </div>

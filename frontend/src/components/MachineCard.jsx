@@ -58,7 +58,7 @@ const MachineCard = ({ machine, recentData }) => {
       
       <div className="machine-card-footer">
         <span className={`power-status ${machine.status}`}>
-          {machine.status === 'on' ? '● ON' : '○ OFF'}
+          {machine.status === 'on' ? 'ON' : 'OFF'}
         </span>
       </div>
     </div>

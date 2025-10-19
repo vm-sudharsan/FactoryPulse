@@ -121,7 +121,7 @@ class ThingSpeakService {
   stopScheduledFetch() {
     if (this.cronJob) {
       this.cronJob.stop();
-      console.log('⏸ Scheduled data fetch stopped');
+      console.log('Scheduled data fetch stopped');
     }
   }
 

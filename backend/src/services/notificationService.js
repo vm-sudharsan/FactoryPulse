@@ -1,13 +1,12 @@
 const { getNotificationModel } = require('../models/Notification');
 const { getMachineModel } = require('../models/Machine');
-const thingSpeakService = require('./thingSpeakService');
 require('dotenv').config();
 
 class NotificationService {
   constructor() {
     this.dbType = process.env.DB_TYPE || 'mongodb';
     this.unacknowledgedNotifications = new Map(); // machineId -> { notificationId, timestamp }
-    this.autoShutdownTimeout = 5 * 60 * 1000; // 5 minutes in milliseconds
+    this.autoShutdownTimeout = 2 * 60 * 1000; // 2 minutes in milliseconds
     this.checkInterval = null;
   }
 
@@ -59,6 +58,12 @@ class NotificationService {
   // Create a notification
   async createNotification(machineId, machineName, sensorData, severity, issues) {
     try {
+      // Check if there's already an unacknowledged critical notification for this machine
+      if (severity === 'critical' && this.unacknowledgedNotifications.has(machineId)) {
+        console.log(`Skipping duplicate critical notification for machine ${machineName} (ID: ${machineId})`);
+        return null;
+      }
+
       const NotificationModel = getNotificationModel();
       const message = `Machine requires maintenance check. Issues: ${issues.join(', ')}`;
 
@@ -92,7 +97,7 @@ class NotificationService {
           timestamp: Date.now(),
           machineName,
         });
-        console.log(`🚨 Critical notification created for machine ${machineName} (ID: ${machineId})`);
+        console.log(`CRITICAL: Notification created for machine ${machineName} (ID: ${machineId}). Auto-shutdown in 2 minutes if not acknowledged.`);
       }
 
       return this.convertToDto(notification);
@@ -224,13 +229,15 @@ class NotificationService {
   async checkUnacknowledgedNotifications() {
     const now = Date.now();
     const machineModel = getMachineModel();
+    // Lazy-load thingSpeakService to avoid circular dependency
+    const thingSpeakService = require('./thingSpeakService');
 
     for (const [machineId, data] of this.unacknowledgedNotifications.entries()) {
       const timeSinceNotification = now - data.timestamp;
 
       if (timeSinceNotification >= this.autoShutdownTimeout) {
         try {
-          console.log(` Auto-shutdown triggered for machine ${data.machineName} (ID: ${machineId}) - 5 minutes elapsed without acknowledgment`);
+          console.log(`Auto-shutdown triggered for machine ${data.machineName} (ID: ${machineId}) - 2 minutes elapsed without acknowledgment`);
 
           // Turn off the machine
           let machine;
@@ -240,9 +247,23 @@ class NotificationService {
               machine.status = 'off';
               await machine.save();
               
-              // Update ThingSpeak
+              // Update ThingSpeak to turn off the machine
               await thingSpeakService.updateMachineStatus(machine.thingspeakFieldId, 'off');
-              console.log(`🛑 Machine ${data.machineName} automatically shut down`);
+              console.log(`SHUTDOWN: Machine ${data.machineName} automatically shut down`);
+              
+              // Create a shutdown notification
+              const NotificationModel = getNotificationModel();
+              await NotificationModel.create({
+                machineId,
+                machineName: data.machineName,
+                message: `Machine automatically shut down after 2 minutes without acknowledgment of critical alert`,
+                severity: 'critical',
+                sensorData: null,
+                isRead: false,
+                isAcknowledged: true,
+                acknowledgedAt: new Date(),
+                createdAt: new Date(),
+              });
             }
           } else {
             machine = await machineModel.findByPk(machineId);
@@ -250,9 +271,23 @@ class NotificationService {
               machine.status = 'off';
               await machine.save();
               
-              // Update ThingSpeak
+              // Update ThingSpeak to turn off the machine
               await thingSpeakService.updateMachineStatus(machine.thingspeakFieldId, 'off');
-              console.log(`🛑 Machine ${data.machineName} automatically shut down`);
+              console.log(`SHUTDOWN: Machine ${data.machineName} automatically shut down`);
+              
+              // Create a shutdown notification
+              const NotificationModel = getNotificationModel();
+              await NotificationModel.create({
+                machineId,
+                machineName: data.machineName,
+                message: `Machine automatically shut down after 2 minutes without acknowledgment of critical alert`,
+                severity: 'critical',
+                sensorData: null,
+                isRead: false,
+                isAcknowledged: true,
+                acknowledgedAt: new Date(),
+                createdAt: new Date(),
+              });
             }
           }
 
@@ -285,7 +320,7 @@ class NotificationService {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
       this.checkInterval = null;
-      console.log('🛑 Auto-shutdown monitor stopped');
+      console.log('Auto-shutdown monitor stopped');
     }
   }
 

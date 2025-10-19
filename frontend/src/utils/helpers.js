@@ -47,9 +47,9 @@ export const getSensorStatusColor = (value, type) => {
 
 const getStatusLevel = (value, type) => {
   const thresholds = {
-    temperature: { warning: 50, critical: 75 },
-    vibration: { warning: 5, critical: 10 },
-    current: { warning: 10, critical: 15 }
+    temperature: { warning: 10, critical: 25 },
+    vibration: { warning: 2, critical: 5 },
+    current: { warning: 5, critical: 10 }
   };
   
   const threshold = thresholds[type];

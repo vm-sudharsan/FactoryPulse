@@ -34,11 +34,20 @@ export const MachineProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    // Poll for machine status and sensor data every 10 seconds for real-time updates
+    const dataInterval = setInterval(() => {
       fetchRecentData();
-    }, 60000); // Refresh every 60 seconds
+    }, 10000); // Refresh every 10 seconds
 
-    return () => clearInterval(interval);
+    // Poll for machine status changes every 5 seconds
+    const machineInterval = setInterval(() => {
+      fetchMachines();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => {
+      clearInterval(dataInterval);
+      clearInterval(machineInterval);
+    };
   }, []);
 
   const value = {

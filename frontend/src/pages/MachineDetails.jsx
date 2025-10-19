@@ -19,6 +19,13 @@ const MachineDetails = () => {
 
   useEffect(() => {
     loadMachineData();
+    
+    // Poll for updates every 5 seconds to show real-time status changes
+    const interval = setInterval(() => {
+      loadMachineData();
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, [id]);
 
   const loadMachineData = async () => {
@@ -115,7 +122,7 @@ const MachineDetails = () => {
                 marginBottom: '10px',
                 fontSize: '14px'
               }}>
-                ⚠️ {error}
+                {error}
               </div>
             )}
             <button
@@ -126,7 +133,7 @@ const MachineDetails = () => {
               {toggling ? 'Processing...' : machine?.status === 'on' ? 'Turn OFF' : 'Turn ON'}
             </button>
             <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-              ⏱️ Note: Wait 20 seconds between toggles (ThingSpeak + ESP32 coordination)
+              Note: Wait 20 seconds between toggles (ThingSpeak + ESP32 coordination)
             </p>
           </div>
         </div>
@@ -143,7 +150,7 @@ const MachineDetails = () => {
                     : getSensorStatusColor(recentData.temperature, 'temperature')
                 }}
               >
-                <span className="reading-label">🌡️ Temperature</span>
+                <span className="reading-label">Temperature</span>
                 <span className="reading-value">
                   {machine?.status === 'off' ? '0.00' : recentData.temperature?.toFixed(2)}°C
                 </span>
@@ -156,7 +163,7 @@ const MachineDetails = () => {
                     : getSensorStatusColor(recentData.vibration, 'vibration')
                 }}
               >
-                <span className="reading-label">📳 Vibration</span>
+                <span className="reading-label">Vibration</span>
                 <span className="reading-value">
                   {machine?.status === 'off' ? '0.00' : recentData.vibration?.toFixed(2)} Hz
                 </span>
@@ -169,13 +176,13 @@ const MachineDetails = () => {
                     : getSensorStatusColor(recentData.current, 'current')
                 }}
               >
-                <span className="reading-label">⚡ Current</span>
+                <span className="reading-label">Current</span>
                 <span className="reading-value">
                   {machine?.status === 'off' ? '0.00' : recentData.current?.toFixed(2)} A
                 </span>
               </div>
               <div className="reading-item" style={{ backgroundColor: '#f5f5f5' }}>
-                <span className="reading-label">🕐 Last Updated</span>
+                <span className="reading-label">Last Updated</span>
                 <span className="reading-value">{formatDate(recentData.timestamp)}</span>
               </div>
             </div>
