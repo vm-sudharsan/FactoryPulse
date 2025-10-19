@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const { user, logout, isOwner } = useContext(AuthContext);
@@ -15,7 +16,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/dashboard" className="navbar-logo">
-          <h2>🏭 Factory Pulse</h2>
+          <h2>Factory Pulse</h2>
         </Link>
         
         <div className="navbar-menu">
@@ -27,6 +28,8 @@ const Navbar = () => {
               <Link to="/admin/operators" className="navbar-link">Manage Operators</Link>
             </>
           )}
+          
+          <NotificationBell />
           
           <div className="navbar-user">
             <span className="user-name">{user?.name}</span>

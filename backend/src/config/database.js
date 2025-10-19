@@ -6,9 +6,9 @@ require('dotenv').config();
 const connectMongoDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ MongoDB Connected Successfully');
+    console.log('MongoDB Connected Successfully');
   } catch (error) {
-    console.error('❌ MongoDB Connection Error:', error.message);
+    console.error('MongoDB Connection Error:', error.message);
     process.exit(1);
   }
 };
@@ -35,11 +35,11 @@ const sequelize = new Sequelize(
 const connectPostgreSQL = async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ PostgreSQL Connected Successfully');
+    console.log('PostgreSQL Connected Successfully');
     await sequelize.sync({ alter: true });
-    console.log('✅ PostgreSQL Models Synchronized');
+    console.log(' PostgreSQL Models Synchronized');
   } catch (error) {
-    console.error('❌ PostgreSQL Connection Error:', error.message);
+    console.error('PostgreSQL Connection Error:', error.message);
     process.exit(1);
   }
 };
@@ -48,14 +48,14 @@ const connectPostgreSQL = async () => {
 const initializeDatabase = async () => {
   const dbType = process.env.DB_TYPE || 'mongodb';
   
-  console.log(`🔄 Initializing ${dbType.toUpperCase()} database...`);
+  console.log(`Initializing ${dbType.toUpperCase()} database...`);
   
   if (dbType === 'mongodb') {
     await connectMongoDB();
   } else if (dbType === 'postgresql') {
     await connectPostgreSQL();
   } else {
-    console.error('❌ Invalid DB_TYPE. Use "mongodb" or "postgresql"');
+    console.error('Invalid DB_TYPE. Use "mongodb" or "postgresql"');
     process.exit(1);
   }
 };

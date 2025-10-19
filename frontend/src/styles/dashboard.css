@@ -322,15 +322,15 @@
   .navbar-menu {
     gap: 1rem;
   }
-  
+
   .machine-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
-  
+
   .machine-info-card {
     grid-template-columns: 1fr;
   }
-  
+
   .control-section {
     border-left: none;
     border-top: 1px solid var(--border-color);
@@ -344,12 +344,12 @@
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .navbar-menu {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .navbar-user {
     border-left: none;
     border-top: 1px solid var(--border-color);
@@ -358,7 +358,7 @@
     width: 100%;
     justify-content: center;
   }
-  
+
   .dashboard-header,
   .details-header,
   .manage-header {
@@ -366,23 +366,23 @@
     gap: 1rem;
     align-items: flex-start;
   }
-  
+
   .machine-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .summary-metrics {
     grid-template-columns: 1fr;
   }
-  
+
   .readings-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .data-table {
     font-size: 0.875rem;
   }
-  
+
   .data-table th,
   .data-table td {
     padding: 10px;

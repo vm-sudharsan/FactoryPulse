@@ -21,15 +21,15 @@ const LandingPage = () => {
           <p className="landing-description">
             Real-time monitoring and control of industrial machines with IoT integration
           </p>
-          
+
           <div className="landing-buttons">
-            <button 
+            <button
               className="btn btn-primary btn-large"
               onClick={() => navigate('/login')}
             >
               Get Started
             </button>
-            <button 
+            <button
               className="btn btn-secondary btn-large"
               onClick={() => navigate('/signup')}
             >
@@ -46,31 +46,31 @@ const LandingPage = () => {
               <h4>Real-Time Data</h4>
               <p>Monitor temperature, vibration, and current in real-time</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">🎛️</div>
               <h4>Remote Control</h4>
               <p>Turn machines ON/OFF remotely via ThingSpeak</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">👥</div>
               <h4>Role-Based Access</h4>
               <p>Owner and Operator roles with different permissions</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">⚠️</div>
               <h4>Smart Alerts</h4>
               <p>Color-coded status indicators for quick health assessment</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">📈</div>
               <h4>Historical Data</h4>
               <p>View trends and patterns with interactive charts</p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">🔒</div>
               <h4>Secure Access</h4>

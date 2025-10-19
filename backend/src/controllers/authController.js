@@ -4,18 +4,18 @@ const { getUserModel } = require('../models/User');
 class AuthController {
   async signup(req, res) {
     try {
-      console.log('📝 Signup request received:', { email: req.body.email, name: req.body.name });
+      console.log('Signup request received:', { email: req.body.email, name: req.body.name });
       
       const { name, email, password, role } = req.body;
 
       if (!name || !email || !password) {
-        console.log('❌ Missing required fields');
+        console.log(' Missing required fields');
         return res.status(400).json({ message: 'All fields are required' });
       }
 
       const UserModel = getUserModel();
       const dbType = process.env.DB_TYPE || 'mongodb';
-      console.log('📊 Using database:', dbType);
+      console.log(' Using database:', dbType);
 
       // Check if user already exists
       let existingUser;
@@ -26,12 +26,12 @@ class AuthController {
       }
 
       if (existingUser) {
-        console.log('❌ User already exists:', email);
+        console.log('User already exists:', email);
         return res.status(400).json({ message: 'User already exists' });
       }
 
       // Create new user
-      console.log('✅ Creating new user...');
+      console.log(' Creating new user...');
       let user;
       if (dbType === 'mongodb') {
         user = new UserModel({
@@ -52,7 +52,7 @@ class AuthController {
         user = user.toJSON();
       }
 
-      console.log('✅ User created successfully');
+      console.log('User created successfully');
 
       // Generate JWT token
       const token = jwt.sign(
@@ -64,14 +64,14 @@ class AuthController {
       // Remove password from response
       delete user.password;
 
-      console.log('✅ Signup complete, sending response');
+      console.log('Signup complete, sending response');
       return res.status(201).json({
         message: 'User created successfully',
         token,
         user,
       });
     } catch (error) {
-      console.error('❌ Signup error:', error);
+      console.error('Signup error:', error);
       console.error('Error stack:', error.stack);
       return res.status(500).json({ 
         message: 'Internal server error',

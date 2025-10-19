@@ -1,0 +1,258 @@
+/* Notification Bell Container */
+.notification-bell-container {
+  position: relative;
+  margin: 0 15px;
+}
+
+.notification-bell-button {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.notification-bell-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #f44336;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 400px;
+  max-height: 600px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+}
+
+.notification-dropdown-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.notification-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.notification-close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Notification List */
+.notification-list {
+  overflow-y: auto;
+  max-height: 540px;
+}
+
+.notification-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+/* Notification Item */
+.notification-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.notification-item:hover {
+  opacity: 0.9;
+}
+
+.notification-item.unread {
+  border-left: 4px solid #2196f3;
+}
+
+.notification-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.notification-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.notification-machine-name {
+  font-size: 14px;
+}
+
+.notification-severity {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.notification-severity.warning {
+  background-color: #ff9800;
+  color: white;
+}
+
+.notification-severity.critical {
+  background-color: #f44336;
+  color: white;
+}
+
+.notification-message {
+  font-size: 13px;
+  color: #555;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.notification-sensor-data {
+  display: flex;
+  gap: 12px;
+  margin: 10px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.notification-sensor-data span {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.notification-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.notification-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.notification-acknowledge-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-acknowledge-btn:hover {
+  background-color: #45a049;
+}
+
+.notification-acknowledged {
+  font-size: 11px;
+  color: #4caf50;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notification-dropdown {
+    width: 320px;
+    right: -50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-dropdown {
+    width: 90vw;
+    right: -100px;
+  }
+}
+
+/* Machine Card Metric Styling */
+.metric {
+  padding: 10px;
+  border-radius: 6px;
+  margin: 5px 0;
+  transition: all 0.3s ease;
+}
+
+.metric:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Status Badge Updates */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.status-normal {
+  background-color: #81c784;
+  color: white;
+}
+
+.status-badge.status-warning {
+  background-color: #ffb74d;
+  color: white;
+}
+
+.status-badge.status-critical {
+  background-color: #e57373;
+  color: white;
+}

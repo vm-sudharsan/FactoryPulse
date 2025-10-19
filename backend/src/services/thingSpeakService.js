@@ -2,6 +2,7 @@ const axios = require('axios');
 const cron = require('node-cron');
 const { getSensorDataModel } = require('../models/SensorData');
 const { getMachineModel } = require('../models/Machine');
+const notificationService = require('./notificationService');
 require('dotenv').config();
 
 class ThingSpeakService {
@@ -18,7 +19,7 @@ class ThingSpeakService {
 
   async fetchAndSaveData() {
     try {
-      console.log('🔄 Fetching data from ThingSpeak...');
+      console.log('Fetching data from ThingSpeak...');
       
       const response = await axios.get(this.apiUrl);
       const data = response.data;
@@ -52,16 +53,53 @@ class ThingSpeakService {
           });
         }
 
-        console.log('✅ Data successfully fetched and saved:', {
+        console.log('Data successfully fetched and saved:', {
           temperature,
           vibration,
           current,
         });
+
+        // Check for abnormal sensor readings and create notifications
+        await this.checkAndCreateNotifications({ temperature, vibration, current });
       } else {
-        console.log('⚠️ No feeds found in ThingSpeak response');
+        console.log(' No feeds found in ThingSpeak response');
       }
     } catch (error) {
-      console.error('❌ Error fetching data from ThingSpeak:', error.message);
+      console.error(' Error fetching data from ThingSpeak:', error.message);
+    }
+  }
+
+  async checkAndCreateNotifications(sensorData) {
+    try {
+      // Get all active machines
+      const MachineModel = getMachineModel();
+      const dbType = process.env.DB_TYPE || 'mongodb';
+
+      let machines;
+      if (dbType === 'mongodb') {
+        machines = await MachineModel.find({ status: 'on' }).lean();
+      } else {
+        machines = await MachineModel.findAll({ where: { status: 'on' } });
+        machines = machines.map(m => m.toJSON());
+      }
+
+      // Analyze sensor data for each active machine
+      for (const machine of machines) {
+        const analysis = notificationService.analyzeSensorData(sensorData);
+        
+        if (analysis.severity === 'warning' || analysis.severity === 'critical') {
+          const machineId = machine._id || machine.id;
+          await notificationService.createNotification(
+            machineId.toString(),
+            machine.name,
+            sensorData,
+            analysis.severity,
+            analysis.issues
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error checking and creating notifications:', error.message);
     }
   }
 
@@ -74,7 +112,7 @@ class ThingSpeakService {
       this.fetchAndSaveData();
     });
 
-    console.log(`⏰ Scheduled data fetch every ${intervalSeconds} seconds`);
+    console.log(`Scheduled data fetch every ${intervalSeconds} seconds`);
     
     // Fetch immediately on start
     this.fetchAndSaveData();
@@ -83,7 +121,7 @@ class ThingSpeakService {
   stopScheduledFetch() {
     if (this.cronJob) {
       this.cronJob.stop();
-      console.log('⏸️ Scheduled data fetch stopped');
+      console.log('⏸ Scheduled data fetch stopped');
     }
   }
 
@@ -103,7 +141,7 @@ class ThingSpeakService {
       // Use hardcoded write API key for single-prototype setup
       const url = `https://api.thingspeak.com/update?api_key=${this.writeApiKey}&field${fieldId}=${value}`;
       
-      console.log(`📡 Updating ThingSpeak field${fieldId} to ${value}...`);
+      console.log(`Updating ThingSpeak field${fieldId} to ${value}...`);
       
       // Retry logic for rate limit
       let retries = 3;
@@ -111,7 +149,7 @@ class ThingSpeakService {
       
       while (retries > 0) {
         response = await axios.get(url);
-        console.log(`📥 ThingSpeak response (attempt ${4 - retries}):`, response.data);
+        console.log(`ThingSpeak response (attempt ${4 - retries}):`, response.data);
         
         if (response.data !== 0) {
           break; // Success!
@@ -119,7 +157,7 @@ class ThingSpeakService {
         
         retries--;
         if (retries > 0) {
-          console.log(`⏳ Rate limit hit, waiting 5 seconds before retry...`);
+          console.log(` Rate limit hit, waiting 5 seconds before retry...`);
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
@@ -131,17 +169,17 @@ class ThingSpeakService {
       // Update last update time on success
       this.lastUpdateTime = now;
       
-      console.log(`✅ GPIO control: field${fieldId} set to ${value} (Entry ID: ${response.data})`);
+      console.log(`GPIO control: field${fieldId} set to ${value} (Entry ID: ${response.data})`);
       return response.data;
     } catch (error) {
       if (error.response) {
-        console.error('❌ ThingSpeak API Error:', {
+        console.error('ThingSpeak API Error:', {
           status: error.response.status,
           data: error.response.data,
           message: error.message
         });
       } else {
-        console.error('❌ Error controlling GPIO:', error.message);
+        console.error(' Error controlling GPIO:', error.message);
       }
       throw new Error(`ThingSpeak update failed: ${error.message}`);
     }
@@ -160,9 +198,14 @@ class ThingSpeakService {
       
       return 'off';
     } catch (error) {
-      console.error('❌ Error getting current status:', error.message);
+      console.error(' Error getting current status:', error.message);
       return 'off';
     }
+  }
+
+  async updateMachineStatus(fieldId, status) {
+    const value = status === 'on' ? 1 : 0;
+    return await this.controlGPIO(fieldId, value);
   }
 }
 

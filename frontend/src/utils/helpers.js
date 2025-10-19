@@ -32,6 +32,19 @@ export const getMachineStatusColor = (temperature, vibration, current) => {
   }
 };
 
+export const getSensorStatusColor = (value, type) => {
+  const status = getStatusLevel(value, type);
+  
+  // Calm, minimal colors
+  const colors = {
+    normal: '#e8f5e9',    // Very light green
+    warning: '#fff3e0',   // Very light orange
+    critical: '#ffebee'   // Very light red
+  };
+  
+  return colors[status];
+};
+
 const getStatusLevel = (value, type) => {
   const thresholds = {
     temperature: { warning: 50, critical: 75 },

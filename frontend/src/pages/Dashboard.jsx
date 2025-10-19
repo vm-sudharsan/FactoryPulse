@@ -35,7 +35,7 @@ const Dashboard = () => {
             className="btn btn-secondary"
             disabled={refreshing}
           >
-            {refreshing ? '🔄 Refreshing...' : '🔄 Refresh Data'}
+            {refreshing ? 'Refreshing...' : 'Refresh Data'}
           </button>
         </div>
 

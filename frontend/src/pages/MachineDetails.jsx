@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import MachineChart from '../components/MachineChart';
 import Loader from '../components/Loader';
 import machineService from '../services/machineService';
-import { formatDate } from '../utils/helpers';
+import { formatDate, getSensorStatusColor } from '../utils/helpers';
 
 const MachineDetails = () => {
   const { id } = useParams();
@@ -135,25 +135,46 @@ const MachineDetails = () => {
           <div className="recent-readings-card">
             <h3>Recent Sensor Readings</h3>
             <div className="readings-grid">
-              <div className="reading-item">
+              <div 
+                className="reading-item" 
+                style={{ 
+                  backgroundColor: machine?.status === 'off' 
+                    ? '#f5f5f5' 
+                    : getSensorStatusColor(recentData.temperature, 'temperature')
+                }}
+              >
                 <span className="reading-label">🌡️ Temperature</span>
                 <span className="reading-value">
                   {machine?.status === 'off' ? '0.00' : recentData.temperature?.toFixed(2)}°C
                 </span>
               </div>
-              <div className="reading-item">
+              <div 
+                className="reading-item"
+                style={{ 
+                  backgroundColor: machine?.status === 'off' 
+                    ? '#f5f5f5' 
+                    : getSensorStatusColor(recentData.vibration, 'vibration')
+                }}
+              >
                 <span className="reading-label">📳 Vibration</span>
                 <span className="reading-value">
                   {machine?.status === 'off' ? '0.00' : recentData.vibration?.toFixed(2)} Hz
                 </span>
               </div>
-              <div className="reading-item">
+              <div 
+                className="reading-item"
+                style={{ 
+                  backgroundColor: machine?.status === 'off' 
+                    ? '#f5f5f5' 
+                    : getSensorStatusColor(recentData.current, 'current')
+                }}
+              >
                 <span className="reading-label">⚡ Current</span>
                 <span className="reading-value">
                   {machine?.status === 'off' ? '0.00' : recentData.current?.toFixed(2)} A
                 </span>
               </div>
-              <div className="reading-item">
+              <div className="reading-item" style={{ backgroundColor: '#f5f5f5' }}>
                 <span className="reading-label">🕐 Last Updated</span>
                 <span className="reading-value">{formatDate(recentData.timestamp)}</span>
               </div>
