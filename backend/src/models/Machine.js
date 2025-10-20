@@ -21,6 +21,20 @@ const machineSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  thresholds: {
+    temperature: {
+      warning: { type: Number, default: 10 },
+      critical: { type: Number, default: 25 }
+    },
+    vibration: {
+      warning: { type: Number, default: 2 },
+      critical: { type: Number, default: 5 }
+    },
+    current: {
+      warning: { type: Number, default: 5 },
+      critical: { type: Number, default: 10 }
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -51,6 +65,15 @@ const MachinePostgres = sequelize.define('Machine', {
   },
   thingspeakFieldId: {
     type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  thresholds: {
+    type: DataTypes.JSONB,
+    defaultValue: {
+      temperature: { warning: 10, critical: 25 },
+      vibration: { warning: 2, critical: 5 },
+      current: { warning: 5, critical: 10 }
+    },
     allowNull: false,
   },
   createdAt: {

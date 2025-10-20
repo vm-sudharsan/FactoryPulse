@@ -83,9 +83,11 @@ class ThingSpeakService {
         machines = machines.map(m => m.toJSON());
       }
 
-      // Analyze sensor data for each active machine
+      // Analyze sensor data for each active machine with its specific thresholds
       for (const machine of machines) {
-        const analysis = notificationService.analyzeSensorData(sensorData);
+        // Use machine-specific thresholds if available, otherwise use defaults
+        const machineThresholds = machine.thresholds || null;
+        const analysis = notificationService.analyzeSensorData(sensorData, machineThresholds);
         
         if (analysis.severity === 'warning' || analysis.severity === 'critical') {
           const machineId = machine._id || machine.id;

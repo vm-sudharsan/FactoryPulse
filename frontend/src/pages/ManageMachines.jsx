@@ -11,7 +11,12 @@ const ManageMachines = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    thingspeakFieldId: ''
+    thingspeakFieldId: '',
+    thresholds: {
+      temperature: { warning: 10, critical: 25 },
+      vibration: { warning: 2, critical: 5 },
+      current: { warning: 5, critical: 10 }
+    }
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -36,6 +41,19 @@ const ManageMachines = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
+    });
+  };
+
+  const handleThresholdChange = (sensor, level, value) => {
+    setFormData({
+      ...formData,
+      thresholds: {
+        ...formData.thresholds,
+        [sensor]: {
+          ...formData.thresholds[sensor],
+          [level]: parseFloat(value) || 0
+        }
+      }
     });
   };
 
@@ -65,7 +83,12 @@ const ManageMachines = () => {
     setFormData({
       name: machine.name,
       description: machine.description || '',
-      thingspeakFieldId: machine.thingspeakFieldId
+      thingspeakFieldId: machine.thingspeakFieldId,
+      thresholds: machine.thresholds || {
+        temperature: { warning: 10, critical: 25 },
+        vibration: { warning: 2, critical: 5 },
+        current: { warning: 5, critical: 10 }
+      }
     });
     setShowForm(true);
   };
@@ -88,7 +111,12 @@ const ManageMachines = () => {
     setFormData({
       name: '',
       description: '',
-      thingspeakFieldId: ''
+      thingspeakFieldId: '',
+      thresholds: {
+        temperature: { warning: 10, critical: 25 },
+        vibration: { warning: 2, critical: 5 },
+        current: { warning: 5, critical: 10 }
+      }
     });
     setEditingMachine(null);
     setShowForm(false);
@@ -152,6 +180,93 @@ const ManageMachines = () => {
                   placeholder="Enter field ID (e.g., 4 for field4)"
                   required
                 />
+              </div>
+
+              <div className="form-section">
+                <h4 style={{ marginTop: '20px', marginBottom: '15px', color: '#333' }}>Sensor Thresholds</h4>
+                
+                <div className="threshold-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+                  {/* Temperature Thresholds */}
+                  <div className="threshold-group">
+                    <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>Temperature (°C)</label>
+                    <div className="form-group" style={{ marginBottom: '10px' }}>
+                      <label htmlFor="temp-warning" style={{ fontSize: '13px' }}>Warning</label>
+                      <input
+                        type="number"
+                        id="temp-warning"
+                        value={formData.thresholds.temperature.warning}
+                        onChange={(e) => handleThresholdChange('temperature', 'warning', e.target.value)}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="temp-critical" style={{ fontSize: '13px' }}>Critical</label>
+                      <input
+                        type="number"
+                        id="temp-critical"
+                        value={formData.thresholds.temperature.critical}
+                        onChange={(e) => handleThresholdChange('temperature', 'critical', e.target.value)}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Vibration Thresholds */}
+                  <div className="threshold-group">
+                    <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>Vibration (Hz)</label>
+                    <div className="form-group" style={{ marginBottom: '10px' }}>
+                      <label htmlFor="vib-warning" style={{ fontSize: '13px' }}>Warning</label>
+                      <input
+                        type="number"
+                        id="vib-warning"
+                        value={formData.thresholds.vibration.warning}
+                        onChange={(e) => handleThresholdChange('vibration', 'warning', e.target.value)}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="vib-critical" style={{ fontSize: '13px' }}>Critical</label>
+                      <input
+                        type="number"
+                        id="vib-critical"
+                        value={formData.thresholds.vibration.critical}
+                        onChange={(e) => handleThresholdChange('vibration', 'critical', e.target.value)}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Current Thresholds */}
+                  <div className="threshold-group">
+                    <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>Current (A)</label>
+                    <div className="form-group" style={{ marginBottom: '10px' }}>
+                      <label htmlFor="curr-warning" style={{ fontSize: '13px' }}>Warning</label>
+                      <input
+                        type="number"
+                        id="curr-warning"
+                        value={formData.thresholds.current.warning}
+                        onChange={(e) => handleThresholdChange('current', 'warning', e.target.value)}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="curr-critical" style={{ fontSize: '13px' }}>Critical</label>
+                      <input
+                        type="number"
+                        id="curr-critical"
+                        value={formData.thresholds.current.critical}
+                        onChange={(e) => handleThresholdChange('current', 'critical', e.target.value)}
+                        step="0.1"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="form-actions">

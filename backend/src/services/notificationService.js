@@ -10,8 +10,8 @@ class NotificationService {
     this.checkInterval = null;
   }
 
-  // Thresholds for sensor readings
-  getThresholds() {
+  // Get default thresholds (fallback if machine doesn't have custom thresholds)
+  getDefaultThresholds() {
     return {
       temperature: { warning: 10, critical: 25 },
       vibration: { warning: 2, critical: 5 },
@@ -19,9 +19,9 @@ class NotificationService {
     };
   }
 
-  // Analyze sensor data and determine severity
-  analyzeSensorData(sensorData) {
-    const thresholds = this.getThresholds();
+  // Analyze sensor data and determine severity using machine-specific thresholds
+  analyzeSensorData(sensorData, machineThresholds = null) {
+    const thresholds = machineThresholds || this.getDefaultThresholds();
     let severity = 'normal';
     const issues = [];
 

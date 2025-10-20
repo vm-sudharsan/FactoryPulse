@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import MachineChart from '../components/MachineChart';
@@ -16,34 +16,48 @@ const MachineDetails = () => {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState('');
+  const previousDataRef = useRef({ machine: null, recentData: null });
 
   useEffect(() => {
     loadMachineData();
     
-    // Poll for updates every 5 seconds to show real-time status changes
+    // Poll for updates every 5 seconds (silent updates to prevent flicker)
     const interval = setInterval(() => {
-      loadMachineData();
+      loadMachineData(true);
     }, 5000);
     
     return () => clearInterval(interval);
   }, [id]);
 
-  const loadMachineData = async () => {
+  const loadMachineData = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [machineData, allData, recent] = await Promise.all([
         machineService.getMachineById(id),
         machineService.getAllData(),
         machineService.getRecentData()
       ]);
       
-      setMachine(machineData);
+      // Only update if data has changed (prevents flicker)
+      const machineChanged = JSON.stringify(machineData) !== JSON.stringify(previousDataRef.current.machine);
+      const recentChanged = JSON.stringify(recent) !== JSON.stringify(previousDataRef.current.recentData);
+      
+      if (machineChanged) {
+        setMachine(machineData);
+        previousDataRef.current.machine = machineData;
+      }
+      
+      if (recentChanged) {
+        setRecentData(recent);
+        previousDataRef.current.recentData = recent;
+      }
+      
+      // Always update sensor data array (for charts)
       setSensorData(allData);
-      setRecentData(recent);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load machine data');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 

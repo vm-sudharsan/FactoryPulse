@@ -57,7 +57,7 @@ class MachineController {
 
   async createMachine(req, res) {
     try {
-      const { name, description } = req.body;
+      const { name, description, thresholds } = req.body;
 
       if (!name) {
         return res.status(400).json({ message: 'Name is required' });
@@ -69,6 +69,13 @@ class MachineController {
       // All machines use Field 4 (single-prototype setup with one ESP32)
       const thingspeakFieldId = 4;
 
+      // Default thresholds if not provided
+      const defaultThresholds = {
+        temperature: { warning: 10, critical: 25 },
+        vibration: { warning: 2, critical: 5 },
+        current: { warning: 5, critical: 10 }
+      };
+
       let machine;
       if (dbType === 'mongodb') {
         machine = new MachineModel({
@@ -76,6 +83,7 @@ class MachineController {
           description: description || '',
           thingspeakFieldId,
           status: 'off',
+          thresholds: thresholds || defaultThresholds,
         });
         await machine.save();
         machine = machine.toObject();
@@ -85,6 +93,7 @@ class MachineController {
           description: description || '',
           thingspeakFieldId,
           status: 'off',
+          thresholds: thresholds || defaultThresholds,
         });
         machine = machine.toJSON();
       }
@@ -105,22 +114,27 @@ class MachineController {
   async updateMachine(req, res) {
     try {
       const { id } = req.params;
-      const { name, description } = req.body;
+      const { name, description, thresholds } = req.body;
 
       const MachineModel = getMachineModel();
       const dbType = process.env.DB_TYPE || 'mongodb';
+
+      const updateData = { name, description };
+      if (thresholds) {
+        updateData.thresholds = thresholds;
+      }
 
       let machine;
       if (dbType === 'mongodb') {
         machine = await MachineModel.findByIdAndUpdate(
           id,
-          { name, description },
+          updateData,
           { new: true }
         ).lean();
       } else {
         machine = await MachineModel.findByPk(id);
         if (machine) {
-          await machine.update({ name, description });
+          await machine.update(updateData);
           machine = machine.toJSON();
         }
       }

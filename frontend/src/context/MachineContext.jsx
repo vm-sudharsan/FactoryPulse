@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useRef } from 'react';
 import machineService from '../services/machineService';
 
 export const MachineContext = createContext();
@@ -7,23 +7,37 @@ export const MachineProvider = ({ children }) => {
   const [machines, setMachines] = useState([]);
   const [recentData, setRecentData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const previousMachinesRef = useRef([]);
+  const previousDataRef = useRef(null);
 
-  const fetchMachines = async () => {
+  const fetchMachines = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const data = await machineService.getAllMachines();
-      setMachines(data);
+      
+      // Only update if data has changed (prevents unnecessary re-renders)
+      const dataChanged = JSON.stringify(data) !== JSON.stringify(previousMachinesRef.current);
+      if (dataChanged) {
+        setMachines(data);
+        previousMachinesRef.current = data;
+      }
     } catch (error) {
       console.error('Error fetching machines:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  const fetchRecentData = async () => {
+  const fetchRecentData = async (silent = false) => {
     try {
       const data = await machineService.getRecentData();
-      setRecentData(data);
+      
+      // Only update if data has changed (prevents flicker)
+      const dataChanged = JSON.stringify(data) !== JSON.stringify(previousDataRef.current);
+      if (dataChanged) {
+        setRecentData(data);
+        previousDataRef.current = data;
+      }
     } catch (error) {
       console.error('Error fetching recent data:', error);
     }
@@ -34,15 +48,19 @@ export const MachineProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Poll for machine status and sensor data every 10 seconds for real-time updates
+    // Initial fetch with loading state
+    fetchMachines();
+    fetchRecentData();
+    
+    // Poll for sensor data every 10 seconds (silent updates)
     const dataInterval = setInterval(() => {
-      fetchRecentData();
-    }, 10000); // Refresh every 10 seconds
+      fetchRecentData(true);
+    }, 10000);
 
-    // Poll for machine status changes every 5 seconds
+    // Poll for machine status changes every 5 seconds (silent updates)
     const machineInterval = setInterval(() => {
-      fetchMachines();
-    }, 5000); // Refresh every 5 seconds
+      fetchMachines(true);
+    }, 5000);
 
     return () => {
       clearInterval(dataInterval);
