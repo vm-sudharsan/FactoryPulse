@@ -1,10 +1,11 @@
 /* Navbar */
 .navbar {
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .navbar-container {
@@ -14,32 +15,56 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .navbar-logo {
   color: var(--primary-color);
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .navbar-logo h2 {
   margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .navbar-menu {
   display: flex;
   align-items: center;
   gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .navbar-link {
   color: var(--text-primary);
   font-weight: 500;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+.navbar-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
 }
 
 .navbar-link:hover {
   color: var(--primary-color);
+}
+
+.navbar-link:hover::after {
+  width: 100%;
 }
 
 .navbar-user {
@@ -48,6 +73,8 @@
   gap: 10px;
   padding-left: 20px;
   border-left: 1px solid var(--border-color);
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .user-name {
@@ -156,20 +183,52 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .machine-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: var(--shadow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.machine-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+}
+
+.machine-card:hover::before {
+  transform: scaleX(1);
 }
 
 .machine-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
 }
 
 .machine-card-header {
@@ -319,12 +378,17 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
+  .navbar-container {
+    padding: 1rem 1.5rem;
+  }
+
   .navbar-menu {
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .machine-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
   }
 
   .machine-info-card {
@@ -337,26 +401,39 @@
     padding-left: 0;
     padding-top: 2rem;
   }
+
+  .summary-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .navbar-container {
     flex-direction: column;
     gap: 1rem;
+    padding: 1rem;
   }
 
   .navbar-menu {
     flex-direction: column;
     width: 100%;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .navbar-link {
+    width: 100%;
+    padding: 0.75rem 0;
   }
 
   .navbar-user {
     border-left: none;
     border-top: 1px solid var(--border-color);
     padding-left: 0;
-    padding-top: 10px;
+    padding-top: 1rem;
     width: 100%;
     justify-content: center;
+    flex-wrap: wrap;
   }
 
   .dashboard-header,
@@ -367,16 +444,31 @@
     align-items: flex-start;
   }
 
+  .dashboard-container,
+  .machine-details-container,
+  .manage-container {
+    padding: 1.5rem 1rem;
+  }
+
   .machine-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .summary-metrics {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .readings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .machine-info-card,
+  .recent-readings-card,
+  .chart-card,
+  .form-card {
+    padding: 1.5rem;
   }
 
   .data-table {
@@ -385,6 +477,44 @@
 
   .data-table th,
   .data-table td {
-    padding: 10px;
+    padding: 10px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 0.875rem;
+  }
+
+  .navbar-logo {
+    font-size: 1.25rem;
+  }
+
+  .dashboard-container,
+  .machine-details-container,
+  .manage-container {
+    padding: 1rem 0.75rem;
+  }
+
+  .machine-card {
+    padding: 1.25rem;
+  }
+
+  .machine-info-card,
+  .recent-readings-card,
+  .chart-card,
+  .form-card {
+    padding: 1.25rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 8px 6px;
+    font-size: 0.8rem;
   }
 }

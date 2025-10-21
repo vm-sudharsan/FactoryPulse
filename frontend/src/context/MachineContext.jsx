@@ -1,5 +1,6 @@
-import { createContext, useState, useEffect, useRef } from 'react';
+import { createContext, useState, useEffect, useRef, useContext } from 'react';
 import machineService from '../services/machineService';
+import { AuthContext } from './AuthContext';
 
 export const MachineContext = createContext();
 
@@ -9,8 +10,12 @@ export const MachineProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const previousMachinesRef = useRef([]);
   const previousDataRef = useRef(null);
+  const { isAuthenticated } = useContext(AuthContext);
 
   const fetchMachines = async (silent = false) => {
+    // Only fetch if user is authenticated
+    if (!isAuthenticated) return;
+    
     try {
       if (!silent) setLoading(true);
       const data = await machineService.getAllMachines();
@@ -29,6 +34,9 @@ export const MachineProvider = ({ children }) => {
   };
 
   const fetchRecentData = async (silent = false) => {
+    // Only fetch if user is authenticated
+    if (!isAuthenticated) return;
+    
     try {
       const data = await machineService.getRecentData();
       
@@ -44,10 +52,21 @@ export const MachineProvider = ({ children }) => {
   };
 
   const refreshData = async () => {
+    if (!isAuthenticated) return;
     await Promise.all([fetchMachines(), fetchRecentData()]);
   };
 
   useEffect(() => {
+    // Only start fetching data if user is authenticated
+    if (!isAuthenticated) {
+      // Clear data when user logs out
+      setMachines([]);
+      setRecentData(null);
+      previousMachinesRef.current = [];
+      previousDataRef.current = null;
+      return;
+    }
+
     // Initial fetch with loading state
     fetchMachines();
     fetchRecentData();
@@ -66,7 +85,7 @@ export const MachineProvider = ({ children }) => {
       clearInterval(dataInterval);
       clearInterval(machineInterval);
     };
-  }, []);
+  }, [isAuthenticated]); // Re-run when authentication status changes
 
   const value = {
     machines,

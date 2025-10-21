@@ -1,5 +1,6 @@
-import { createContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useState, useEffect, useCallback, useRef, useContext } from 'react';
 import notificationService from '../services/notificationService';
+import { AuthContext } from './AuthContext';
 
 export const NotificationContext = createContext();
 
@@ -9,9 +10,13 @@ export const NotificationProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const MAX_NOTIFICATIONS = 30;
   const previousNotificationsRef = useRef([]);
+  const { isAuthenticated } = useContext(AuthContext);
 
   // Fetch all notifications with queue behavior (limit to 30)
   const fetchNotifications = useCallback(async (silent = false) => {
+    // Only fetch if user is authenticated
+    if (!isAuthenticated) return;
+    
     try {
       if (!silent) setLoading(true);
       const data = await notificationService.getAllNotifications();
@@ -34,10 +39,13 @@ export const NotificationProvider = ({ children }) => {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Fetch unread notifications (silent update for polling)
   const fetchUnreadNotifications = useCallback(async () => {
+    // Only fetch if user is authenticated
+    if (!isAuthenticated) return [];
+    
     try {
       const data = await notificationService.getUnreadNotifications();
       const newUnreadCount = data.length;
@@ -55,7 +63,7 @@ export const NotificationProvider = ({ children }) => {
       console.error('Error fetching unread notifications:', error);
       return [];
     }
-  }, [unreadCount, fetchNotifications]);
+  }, [isAuthenticated, unreadCount, fetchNotifications]);
 
   // Mark notification as read
   const markAsRead = async (notificationId) => {
@@ -96,6 +104,15 @@ export const NotificationProvider = ({ children }) => {
 
   // Initial fetch and smooth polling for new notifications
   useEffect(() => {
+    // Only start fetching if user is authenticated
+    if (!isAuthenticated) {
+      // Clear data when user logs out
+      setNotifications([]);
+      setUnreadCount(0);
+      previousNotificationsRef.current = [];
+      return;
+    }
+
     fetchNotifications(); // Initial fetch with loading state
     
     // Poll for updates every 5 seconds (silent updates to prevent flicker)
@@ -104,7 +121,7 @@ export const NotificationProvider = ({ children }) => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [fetchNotifications, fetchUnreadNotifications]);
+  }, [isAuthenticated, fetchNotifications, fetchUnreadNotifications]);
 
   return (
     <NotificationContext.Provider
