@@ -160,7 +160,7 @@ const LandingPage = () => {
             <a href="#how-it-works">How It Works</a>
             <a href="#capabilities">Capabilities</a>
           </div>
-          <button className="btn-nav" onClick={() => navigate('/login')}>
+          <button className="btn-nav" onClick={() => navigate('/auth')}>
             Start Monitoring
             <ArrowRight size={18} />
           </button>
@@ -205,14 +205,14 @@ const LandingPage = () => {
               <div className="hero-buttons">
                 <button
                   className="btn-primary"
-                  onClick={() => navigate('/signup')}
+                  onClick={() => navigate('/auth')}
                 >
                   Start Monitoring
                   <ArrowRight size={20} />
                 </button>
                 <button
                   className="btn-secondary"
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/auth')}
                 >
                   Sign In
                 </button>
@@ -353,14 +353,14 @@ const LandingPage = () => {
             <div className="cta-buttons">
               <button
                 className="btn-primary"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/auth')}
               >
                 Start Monitoring
                 <ArrowRight size={20} />
               </button>
               <button
                 className="btn-outline"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/auth')}
               >
                 Sign In
               </button>
@@ -378,8 +378,8 @@ const LandingPage = () => {
               <p>Industrial Machine Health Monitoring System</p>
             </div>
             <div className="footer-links">
-              <button onClick={() => navigate('/login')} className="footer-link">Login</button>
-              <button onClick={() => navigate('/signup')} className="footer-link">Sign Up</button>
+              <button onClick={() => navigate('/auth')} className="footer-link">Sign In</button>
+              <button onClick={() => navigate('/auth')} className="footer-link">Get Started</button>
             </div>
           </div>
           <div className="footer-bottom">
