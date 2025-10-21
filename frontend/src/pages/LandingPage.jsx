@@ -245,20 +245,135 @@ const LandingPage = () => {
                   <div className="preview-title">Live Dashboard</div>
                 </div>
                 <div className="preview-content">
-                  <div className="preview-card">
-                    <Thermometer size={24} />
-                    <div className="preview-label">Temperature</div>
-                    <div className="preview-value">45.2°C</div>
+                  <div className="preview-card-row">
+                    <div className="preview-card">
+                      <Thermometer size={24} />
+                      <div className="preview-label">Temperature</div>
+                      <div className="preview-value">45.2°C</div>
+                      <div className="preview-status">Normal</div>
+                      <div className="preview-threshold">Threshold: 60°C</div>
+                    </div>
+                    <div className="preview-mini-chart">
+                      <div className="mini-chart-header">
+                        <span className="mini-chart-label">24h Trend</span>
+                        <TrendingUp size={14} />
+                      </div>
+                      <svg className="sparkline" viewBox="0 0 120 40" preserveAspectRatio="none">
+                        <polyline
+                          fill="none"
+                          stroke="#14b8a6"
+                          strokeWidth="2"
+                          points="0,35 15,32 30,28 45,30 60,25 75,22 90,20 105,18 120,15"
+                        />
+                        <polyline
+                          fill="url(#gradient-temp)"
+                          stroke="none"
+                          points="0,35 15,32 30,28 45,30 60,25 75,22 90,20 105,18 120,15 120,40 0,40"
+                        />
+                        <defs>
+                          <linearGradient id="gradient-temp" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#14b8a6" stopOpacity="0"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="mini-chart-stats">
+                        <span className="stat-item">Min: 42°C</span>
+                        <span className="stat-item">Avg: 44°C</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="preview-card">
-                    <Radio size={24} />
-                    <div className="preview-label">Vibration</div>
-                    <div className="preview-value">2.8 Hz</div>
+
+                  <div className="preview-card-row">
+                    <div className="preview-card">
+                      <Radio size={24} />
+                      <div className="preview-label">Vibration</div>
+                      <div className="preview-value">2.8 Hz</div>
+                      <div className="preview-status">Optimal</div>
+                      <div className="preview-threshold">Threshold: 5 Hz</div>
+                    </div>
+                    <div className="preview-mini-chart">
+                      <div className="mini-chart-header">
+                        <span className="mini-chart-label">24h Trend</span>
+                        <Activity size={14} />
+                      </div>
+                      <svg className="sparkline" viewBox="0 0 120 40" preserveAspectRatio="none">
+                        <polyline
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="2"
+                          points="0,30 15,28 30,32 45,29 60,31 75,28 90,30 105,27 120,29"
+                        />
+                        <polyline
+                          fill="url(#gradient-vib)"
+                          stroke="none"
+                          points="0,30 15,28 30,32 45,29 60,31 75,28 90,30 105,27 120,29 120,40 0,40"
+                        />
+                        <defs>
+                          <linearGradient id="gradient-vib" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="mini-chart-stats">
+                        <span className="stat-item">Min: 2.5 Hz</span>
+                        <span className="stat-item">Avg: 2.7 Hz</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="preview-card">
-                    <Zap size={24} />
-                    <div className="preview-label">Current</div>
-                    <div className="preview-value">12.5 A</div>
+
+                  <div className="preview-card-row">
+                    <div className="preview-card">
+                      <Zap size={24} />
+                      <div className="preview-label">Current</div>
+                      <div className="preview-value">12.5 A</div>
+                      <div className="preview-status">Active</div>
+                      <div className="preview-threshold">Threshold: 15 A</div>
+                    </div>
+                    <div className="preview-mini-chart">
+                      <div className="mini-chart-header">
+                        <span className="mini-chart-label">24h Trend</span>
+                        <Zap size={14} />
+                      </div>
+                      <svg className="sparkline" viewBox="0 0 120 40" preserveAspectRatio="none">
+                        <polyline
+                          fill="none"
+                          stroke="#8b5cf6"
+                          strokeWidth="2"
+                          points="0,25 15,22 30,20 45,23 60,18 75,20 90,17 105,19 120,16"
+                        />
+                        <polyline
+                          fill="url(#gradient-curr)"
+                          stroke="none"
+                          points="0,25 15,22 30,20 45,23 60,18 75,20 90,17 105,19 120,16 120,40 0,40"
+                        />
+                        <defs>
+                          <linearGradient id="gradient-curr" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0"/>
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="mini-chart-stats">
+                        <span className="stat-item">Min: 11.8 A</span>
+                        <span className="stat-item">Avg: 12.2 A</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="preview-info">
+                  <div className="preview-info-item">
+                    <span className="info-label">Last Update:</span>
+                    <span className="info-value">2 seconds ago</span>
+                  </div>
+                  <div className="preview-info-item">
+                    <span className="info-label">Sensors Active:</span>
+                    <span className="info-value">3/3</span>
+                  </div>
+                  <div className="preview-info-item">
+                    <span className="info-label">Status:</span>
+                    <span className="info-value status-online">● Online</span>
                   </div>
                 </div>
               </div>
@@ -374,16 +489,21 @@ const LandingPage = () => {
         <div className="footer-container">
           <div className="footer-content">
             <div className="footer-brand">
-              <h3>Factory Pulse</h3>
-              <p>Industrial Machine Health Monitoring System</p>
+              <div className="footer-logo">
+                <Activity size={32} strokeWidth={2.5} />
+                <h3>Factory Pulse</h3>
+              </div>
+              <p className="footer-description">
+                Real-time IoT-powered monitoring system for industrial excellence. 
+                Track temperature, vibration, and current sensors with instant alerts 
+                and intelligent analytics. Transform your factory operations with 
+                automated safety features and remote machine control.
+              </p>
             </div>
             <div className="footer-links">
               <button onClick={() => navigate('/auth')} className="footer-link">Sign In</button>
               <button onClick={() => navigate('/auth')} className="footer-link">Get Started</button>
             </div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; 2025 Factory Pulse. All rights reserved.</p>
           </div>
         </div>
       </footer>

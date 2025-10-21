@@ -11,7 +11,7 @@ const ProtectedRoute = ({ ownerOnly = false }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (ownerOnly && !isOwner()) {
