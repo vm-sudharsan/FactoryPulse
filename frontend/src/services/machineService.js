@@ -59,6 +59,14 @@ const machineService = {
   deleteOperator: async (id) => {
     const response = await api.delete(`/operators/${id}`);
     return response.data;
+  },
+
+  downloadCSV: async (machineId, startDate, endDate) => {
+    const response = await api.get('/data/download-csv', {
+      params: { machineId, startDate, endDate },
+      responseType: 'blob' // Important for file download
+    });
+    return response;
   }
 };
 

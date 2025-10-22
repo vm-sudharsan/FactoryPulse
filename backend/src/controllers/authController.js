@@ -6,18 +6,14 @@ const thingSpeakService = require('../services/thingSpeakService');
 class AuthController {
   async signup(req, res) {
     try {
-      console.log('Signup request received:', { email: req.body.email, name: req.body.name });
-      
       const { name, email, password, role } = req.body;
 
       if (!name || !email || !password) {
-        console.log(' Missing required fields');
         return res.status(400).json({ message: 'All fields are required' });
       }
 
       const UserModel = getUserModel();
       const dbType = process.env.DB_TYPE || 'mongodb';
-      console.log(' Using database:', dbType);
 
       // Check if user already exists
       let existingUser;
@@ -28,12 +24,9 @@ class AuthController {
       }
 
       if (existingUser) {
-        console.log('User already exists:', email);
         return res.status(400).json({ message: 'User already exists' });
       }
 
-      // Create new user
-      console.log(' Creating new user...');
       let user;
       if (dbType === 'mongodb') {
         user = new UserModel({
@@ -54,8 +47,6 @@ class AuthController {
         user = user.toJSON();
       }
 
-      console.log('User created successfully');
-
       // Generate JWT token
       const token = jwt.sign(
         { id: user.id || user._id, email: user.email, role: user.role },
@@ -74,12 +65,10 @@ class AuthController {
       };
       sessionManager.addSession(token, userInfo);
 
-      // Start data fetching if not already running
       if (!thingSpeakService.isFetchingActive()) {
         thingSpeakService.startScheduledFetch();
       }
 
-      console.log('✅ Signup complete, session created, data fetching active');
       return res.status(201).json({
         message: 'User created successfully',
         token,
@@ -146,12 +135,10 @@ class AuthController {
       };
       sessionManager.addSession(token, userInfo);
 
-      // Start data fetching if not already running
       if (!thingSpeakService.isFetchingActive()) {
         thingSpeakService.startScheduledFetch();
       }
 
-      console.log('✅ Login successful, session created, data fetching active');
       return res.status(200).json({
         message: 'Login successful',
         token,
@@ -184,13 +171,7 @@ class AuthController {
       const token = req.header('Authorization')?.replace('Bearer ', '');
       
       if (token) {
-        // Remove session
         sessionManager.removeSession(token);
-        
-        // If no more active sessions, stop data fetching
-        if (!sessionManager.hasActiveSessions()) {
-          console.log('🔒 No active sessions - data fetching will be paused');
-        }
       }
 
       return res.status(200).json({ 

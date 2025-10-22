@@ -8,4 +8,7 @@ router.get('/recent', sensorDataController.getRecentSensorData);
 // GET /api/data/all - Get all sensor readings
 router.get('/all', sensorDataController.getAllSensorData);
 
+// GET /api/data/download-csv - Download sensor data as CSV
+router.get('/download-csv', sensorDataController.downloadCSV);
+
 module.exports = router;

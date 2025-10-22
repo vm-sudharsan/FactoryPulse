@@ -542,6 +542,13 @@
 }
 
 /* Chart */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .machine-chart {
   margin-top: 1rem;
   width: 100%;
@@ -556,6 +563,99 @@
 
 .machine-chart .recharts-wrapper {
   margin: 0 auto;
+}
+
+/* CSV Download Section */
+.csv-download-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.csv-download-section h4 {
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.download-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.date-range-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.date-input-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.date-input {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: var(--text-primary);
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.date-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  margin-top: 1rem;
+}
+
+.btn-download:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-download:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Manage Pages */
@@ -724,6 +824,15 @@
   .manage-form {
     max-width: 100%;
   }
+
+  .date-range-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-download {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -858,6 +967,29 @@
     padding: 0.375rem 0.75rem;
     font-size: 0.8rem;
     margin-right: 3px;
+  }
+
+  .csv-download-section {
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .csv-download-section h4 {
+    font-size: 1rem;
+  }
+
+  .download-description {
+    font-size: 0.8rem;
+  }
+
+  .date-input {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-download {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
   }
 }
 

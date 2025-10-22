@@ -21,13 +21,9 @@ class ThingSpeakService {
 
   async fetchAndSaveData() {
     try {
-      // Security check: Only fetch data if there are active user sessions
       if (!sessionManager.hasActiveSessions()) {
-        console.log('⏸️  No active sessions - skipping data fetch for security');
         return;
       }
-
-      console.log('📡 Fetching data from ThingSpeak...');
       
       const response = await axios.get(this.apiUrl);
       const data = response.data;
@@ -61,19 +57,13 @@ class ThingSpeakService {
           });
         }
 
-        console.log('Data successfully fetched and saved:', {
-          temperature,
-          vibration,
-          current,
-        });
+        console.log(`Data saved: T=${temperature}°C, V=${vibration}Hz, C=${current}A`);
 
         // Check for abnormal sensor readings and create notifications
         await this.checkAndCreateNotifications({ temperature, vibration, current });
-      } else {
-        console.log(' No feeds found in ThingSpeak response');
       }
     } catch (error) {
-      console.error(' Error fetching data from ThingSpeak:', error.message);
+      console.error('ThingSpeak fetch error:', error.message);
     }
   }
 
@@ -115,23 +105,16 @@ class ThingSpeakService {
 
   startScheduledFetch() {
     if (this.isRunning) {
-      console.log('⚠️  Data fetching already running');
       return;
     }
 
-    // Convert milliseconds to seconds for cron
-    const intervalSeconds = Math.floor(this.fetchInterval / 1000);
-    
-    // Run every minute (or as configured)
     this.cronJob = cron.schedule('*/1 * * * *', () => {
       this.fetchAndSaveData();
     });
 
     this.isRunning = true;
-    console.log(`✅ Scheduled data fetch started (every ${intervalSeconds} seconds)`);
-    console.log(`🔒 Data will only be fetched when users are logged in`);
+    console.log('Data fetching scheduled (every 60 seconds)');
     
-    // Fetch immediately if there are active sessions
     if (sessionManager.hasActiveSessions()) {
       this.fetchAndSaveData();
     }
@@ -142,7 +125,7 @@ class ThingSpeakService {
       this.cronJob.stop();
       this.cronJob = null;
       this.isRunning = false;
-      console.log('⏹️  Scheduled data fetch stopped');
+      console.log('Data fetching stopped');
     }
   }
 

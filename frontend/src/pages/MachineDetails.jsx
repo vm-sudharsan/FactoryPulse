@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Download } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import MachineChart from '../components/MachineChart';
 import Loader from '../components/Loader';
@@ -16,6 +17,10 @@ const MachineDetails = () => {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [downloadError, setDownloadError] = useState('');
   const previousDataRef = useRef({ machine: null, recentData: null });
 
   useEffect(() => {
@@ -73,6 +78,60 @@ const MachineDetails = () => {
       console.error('Toggle error:', errorMsg);
     } finally {
       setToggling(false);
+    }
+  };
+
+  const handleDownloadCSV = async () => {
+    try {
+      setDownloading(true);
+      setDownloadError('');
+
+      // Validate dates
+      if (!startDate || !endDate) {
+        setDownloadError('Please select both start and end dates');
+        return;
+      }
+
+      if (new Date(startDate) > new Date(endDate)) {
+        setDownloadError('Start date must be before end date');
+        return;
+      }
+
+      // Download CSV
+      const response = await machineService.downloadCSV(id, startDate, endDate);
+      
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Extract filename from response headers or generate default
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `${machine?.name || 'machine'}_data.csv`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      // Clear dates after successful download
+      setStartDate('');
+      setEndDate('');
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Failed to download CSV';
+      setDownloadError(errorMsg);
+      console.error('Download error:', errorMsg);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -204,8 +263,67 @@ const MachineDetails = () => {
         )}
 
         <div className="chart-card">
-          <h3>Historical Data</h3>
+          <div className="chart-header">
+            <h3>Historical Data</h3>
+          </div>
           <MachineChart data={sensorData} />
+          
+          {/* CSV Download Section */}
+          <div className="csv-download-section">
+            <h4>Download Data as CSV</h4>
+            <p className="download-description">
+              Select a date range to download sensor readings for {machine?.name}
+            </p>
+            
+            <div className="date-range-picker">
+              <div className="date-input-group">
+                <label htmlFor="startDate">Start Date</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="date-input"
+                />
+              </div>
+              
+              <div className="date-input-group">
+                <label htmlFor="endDate">End Date</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  min={startDate}
+                  className="date-input"
+                />
+              </div>
+            </div>
+
+            {downloadError && (
+              <div className="error-message" style={{ 
+                color: '#f44336', 
+                backgroundColor: '#ffebee', 
+                padding: '10px', 
+                borderRadius: '4px', 
+                marginTop: '10px',
+                fontSize: '14px'
+              }}>
+                {downloadError}
+              </div>
+            )}
+
+            <button
+              onClick={handleDownloadCSV}
+              className="btn btn-download"
+              disabled={downloading || !startDate || !endDate}
+            >
+              <Download size={18} />
+              {downloading ? 'Downloading...' : 'Download CSV'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -55,6 +55,46 @@ class SensorDataService {
     }
   }
 
+  async getDataByDateRange(startDate, endDate) {
+    try {
+      const SensorDataModel = getSensorDataModel();
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      
+      // Set end date to end of day
+      end.setHours(23, 59, 59, 999);
+
+      if (this.dbType === 'mongodb') {
+        const data = await SensorDataModel
+          .find({
+            timestamp: {
+              $gte: start,
+              $lte: end
+            }
+          })
+          .sort({ timestamp: 1 })
+          .lean();
+        
+        return data.map(d => this.convertToDto(d));
+      } else {
+        const data = await SensorDataModel.findAll({
+          where: {
+            timestamp: {
+              [require('sequelize').Op.gte]: start,
+              [require('sequelize').Op.lte]: end
+            }
+          },
+          order: [['timestamp', 'ASC']],
+        });
+        
+        return data.map(d => this.convertToDto(d.toJSON()));
+      }
+    } catch (error) {
+      console.error('Error fetching data by date range:', error.message);
+      throw error;
+    }
+  }
+
   convertToDto(data) {
     return {
       temperature: data.temperature,
