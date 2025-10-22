@@ -12,4 +12,7 @@ router.post('/login', authController.login);
 // GET /api/auth/profile - Get current user profile (protected)
 router.get('/profile', authMiddleware, authController.getProfile);
 
+// POST /api/auth/logout - Logout user
+router.post('/logout', authController.logout);
+
 module.exports = router;

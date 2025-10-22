@@ -3,6 +3,7 @@ const cron = require('node-cron');
 const { getSensorDataModel } = require('../models/SensorData');
 const { getMachineModel } = require('../models/Machine');
 const notificationService = require('./notificationService');
+const sessionManager = require('./sessionManager');
 require('dotenv').config();
 
 class ThingSpeakService {
@@ -15,11 +16,18 @@ class ThingSpeakService {
     this.fetchInterval = process.env.THINGSPEAK_FETCH_INTERVAL || 60000;
     this.cronJob = null;
     this.lastUpdateTime = 0; // Track last update to prevent rate limit issues
+    this.isRunning = false; // Track if data fetching is active
   }
 
   async fetchAndSaveData() {
     try {
-      console.log('Fetching data from ThingSpeak...');
+      // Security check: Only fetch data if there are active user sessions
+      if (!sessionManager.hasActiveSessions()) {
+        console.log('⏸️  No active sessions - skipping data fetch for security');
+        return;
+      }
+
+      console.log('📡 Fetching data from ThingSpeak...');
       
       const response = await axios.get(this.apiUrl);
       const data = response.data;
@@ -106,6 +114,11 @@ class ThingSpeakService {
   }
 
   startScheduledFetch() {
+    if (this.isRunning) {
+      console.log('⚠️  Data fetching already running');
+      return;
+    }
+
     // Convert milliseconds to seconds for cron
     const intervalSeconds = Math.floor(this.fetchInterval / 1000);
     
@@ -114,17 +127,42 @@ class ThingSpeakService {
       this.fetchAndSaveData();
     });
 
-    console.log(`Scheduled data fetch every ${intervalSeconds} seconds`);
+    this.isRunning = true;
+    console.log(`✅ Scheduled data fetch started (every ${intervalSeconds} seconds)`);
+    console.log(`🔒 Data will only be fetched when users are logged in`);
     
-    // Fetch immediately on start
-    this.fetchAndSaveData();
+    // Fetch immediately if there are active sessions
+    if (sessionManager.hasActiveSessions()) {
+      this.fetchAndSaveData();
+    }
   }
 
   stopScheduledFetch() {
     if (this.cronJob) {
       this.cronJob.stop();
-      console.log('Scheduled data fetch stopped');
+      this.cronJob = null;
+      this.isRunning = false;
+      console.log('⏹️  Scheduled data fetch stopped');
     }
+  }
+
+  /**
+   * Check if data fetching is currently running
+   */
+  isFetchingActive() {
+    return this.isRunning;
+  }
+
+  /**
+   * Get current fetching status
+   */
+  getStatus() {
+    return {
+      isRunning: this.isRunning,
+      hasActiveSessions: sessionManager.hasActiveSessions(),
+      activeSessionCount: sessionManager.getActiveSessionCount(),
+      willFetchData: this.isRunning && sessionManager.hasActiveSessions()
+    };
   }
 
   async controlGPIO(fieldId, value) {

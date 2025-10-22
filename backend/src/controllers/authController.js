@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { getUserModel } = require('../models/User');
+const sessionManager = require('../services/sessionManager');
+const thingSpeakService = require('../services/thingSpeakService');
 
 class AuthController {
   async signup(req, res) {
@@ -64,7 +66,20 @@ class AuthController {
       // Remove password from response
       delete user.password;
 
-      console.log('Signup complete, sending response');
+      // Add session and start data fetching if this is the first user
+      const userInfo = {
+        id: user.id || user._id,
+        email: user.email,
+        role: user.role
+      };
+      sessionManager.addSession(token, userInfo);
+
+      // Start data fetching if not already running
+      if (!thingSpeakService.isFetchingActive()) {
+        thingSpeakService.startScheduledFetch();
+      }
+
+      console.log('✅ Signup complete, session created, data fetching active');
       return res.status(201).json({
         message: 'User created successfully',
         token,
@@ -123,6 +138,20 @@ class AuthController {
       // Remove password from response
       delete userObj.password;
 
+      // Add session and start data fetching if this is the first user
+      const userInfo = {
+        id: userObj.id || userObj._id,
+        email: userObj.email,
+        role: userObj.role
+      };
+      sessionManager.addSession(token, userInfo);
+
+      // Start data fetching if not already running
+      if (!thingSpeakService.isFetchingActive()) {
+        thingSpeakService.startScheduledFetch();
+      }
+
+      console.log('✅ Login successful, session created, data fetching active');
       return res.status(200).json({
         message: 'Login successful',
         token,
@@ -142,6 +171,34 @@ class AuthController {
       return res.status(200).json({ user: req.user });
     } catch (error) {
       console.error('Get profile error:', error.message);
+      return res.status(500).json({ 
+        message: 'Internal server error',
+        error: error.message 
+      });
+    }
+  }
+
+  async logout(req, res) {
+    try {
+      // Get token from header
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      
+      if (token) {
+        // Remove session
+        sessionManager.removeSession(token);
+        
+        // If no more active sessions, stop data fetching
+        if (!sessionManager.hasActiveSessions()) {
+          console.log('🔒 No active sessions - data fetching will be paused');
+        }
+      }
+
+      return res.status(200).json({ 
+        message: 'Logout successful',
+        activeSessions: sessionManager.getActiveSessionCount()
+      });
+    } catch (error) {
+      console.error('Logout error:', error.message);
       return res.status(500).json({ 
         message: 'Internal server error',
         error: error.message 

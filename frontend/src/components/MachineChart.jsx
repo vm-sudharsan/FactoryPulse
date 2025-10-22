@@ -17,9 +17,18 @@ const MachineChart = ({ data }) => {
     current: item.current
   }));
 
+  // Responsive height based on screen size
+  const getChartHeight = () => {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 480) return 300;
+      if (window.innerWidth < 768) return 350;
+    }
+    return 400;
+  };
+
   return (
     <div className="machine-chart">
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={getChartHeight()}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" />

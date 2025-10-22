@@ -131,6 +131,7 @@ const operatorRoutes = require('./routes/operatorRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const thingSpeakService = require('./services/thingSpeakService');
 const notificationService = require('./services/notificationService');
+const { sessionActivityMiddleware } = require('./middleware/sessionMiddleware');
 require('dotenv').config();
 
 const app = express();
@@ -139,6 +140,7 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
+app.use(sessionActivityMiddleware); // Track session activity
 
 app.use('/api/data', sensorDataRoutes);
 app.use('/api/auth', authRoutes);
@@ -203,19 +205,30 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await initializeDatabase();
-    thingSpeakService.startScheduledFetch();
+    
+    // DO NOT auto-start data fetching - it will start when first user logs in
+    console.log('🔒 Security Mode: Data fetching will start only after user login');
+    
     notificationService.startAutoShutdownMonitor();
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-      console.log(`Database: ${process.env.DB_TYPE || 'mongodb'}`);
-      console.log(`CORS enabled for: ${process.env.CORS_ALLOWED_ORIGINS}`);
-      console.log(`API Endpoints:`);
+      console.log(`🚀 Server is running on port ${PORT}`);
+      console.log(`📊 Database: ${process.env.DB_TYPE || 'mongodb'}`);
+      console.log(`🌐 CORS enabled for: ${process.env.CORS_ALLOWED_ORIGINS}`);
+      console.log(`\n🔐 Security Features:`);
+      console.log(`   ✅ Authentication-based data fetching`);
+      console.log(`   ✅ Session management enabled`);
+      console.log(`   ✅ Data privacy protection active`);
+      console.log(`\n📡 API Endpoints:`);
+      console.log(`   - POST http://localhost:${PORT}/api/auth/signup`);
+      console.log(`   - POST http://localhost:${PORT}/api/auth/login`);
+      console.log(`   - POST http://localhost:${PORT}/api/auth/logout`);
       console.log(`   - GET http://localhost:${PORT}/api/data/recent`);
       console.log(`   - GET http://localhost:${PORT}/api/data/all`);
       console.log(`   - GET http://localhost:${PORT}/api/notifications`);
+      console.log(`\n⚡ Flow: Landing → Login/Signup → Data Fetching Starts → Dashboard`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error.message);
+    console.error('❌ Failed to start server:', error.message);
     process.exit(1);
   }
 };

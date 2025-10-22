@@ -185,7 +185,7 @@ const ManageMachines = () => {
               <div className="form-section">
                 <h4 style={{ marginTop: '20px', marginBottom: '15px', color: '#333' }}>Sensor Thresholds</h4>
                 
-                <div className="threshold-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+                <div className="threshold-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px' }}>
                   {/* Temperature Thresholds */}
                   <div className="threshold-group">
                     <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>Temperature (°C)</label>
