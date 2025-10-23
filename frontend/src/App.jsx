@@ -6,6 +6,7 @@ import './styles/globals.css';
 import './styles/auth.css';
 import './styles/dashboard.css';
 import './styles/notifications.css';
+import './styles/ai-analysis.css';
 
 function App() {
   return (

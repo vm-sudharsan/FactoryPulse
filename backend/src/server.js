@@ -1,4 +1,7 @@
 const express = require('express');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
 const corsMiddleware = require('./config/corsConfig');
 const { initializeDatabase } = require('./config/database');
 const sensorDataRoutes = require('./routes/sensorDataRoutes');
@@ -6,6 +9,8 @@ const authRoutes = require('./routes/authRoutes');
 const machineRoutes = require('./routes/machineRoutes');
 const operatorRoutes = require('./routes/operatorRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const mlRoutes = require('./routes/mlRoutes');
+const healthRoutes = require('./routes/healthRoutes');
 const thingSpeakService = require('./services/thingSpeakService');
 const notificationService = require('./services/notificationService');
 const { sessionActivityMiddleware } = require('./middleware/sessionMiddleware');
@@ -14,25 +19,51 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+
+// Logging Middleware
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+} else {
+  app.use(morgan('dev'));
+}
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting to API routes
+app.use('/api/', limiter);
+
+// Body Parsing Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(corsMiddleware);
-app.use(sessionActivityMiddleware); // Track session activity
 
+// CORS Middleware
+app.use(corsMiddleware);
+
+// Session Activity Middleware
+app.use(sessionActivityMiddleware);
+
+// Health check route (no rate limiting)
+app.use('/health', healthRoutes);
+
+// API Routes (with rate limiting)
 app.use('/api/data', sensorDataRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/machines', machineRoutes);
 app.use('/api/operators', operatorRoutes);
 app.use('/api/notifications', notificationRoutes);
-
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    message: 'Factory Pulse Backend is running',
-    database: process.env.DB_TYPE || 'mongodb',
-    timestamp: new Date().toISOString()
-  });
-});
+app.use('/api/ml', mlRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({

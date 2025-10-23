@@ -24,7 +24,11 @@ import {
   BarChart,
   Smartphone,
   Server,
-  Wifi
+  Wifi,
+  Brain,
+  FileText,
+  Download,
+  Target
 } from 'lucide-react';
 import '../styles/landing-new.css';
 
@@ -157,6 +161,7 @@ const LandingPage = () => {
           </div>
           <div className="nav-links">
             <a href="#features">Features</a>
+            <a href="#ai-analysis">AI Analysis</a>
             <a href="#how-it-works">How It Works</a>
             <a href="#capabilities">Capabilities</a>
           </div>
@@ -453,6 +458,107 @@ const LandingPage = () => {
                 <p className="step-description">{step.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Analysis Section */}
+      <section id="ai-analysis" className="ai-analysis-section">
+        <div className="ai-analysis-container">
+          <div className="section-header">
+            <div className="ai-badge">
+              <Brain size={20} />
+              <span>NEW: AI-Powered Analysis</span>
+            </div>
+            <h2 className="section-title">Intelligent Machine Health Analysis</h2>
+            <p className="section-subtitle">
+              Advanced ML algorithms analyze your machine data and generate comprehensive health reports with actionable insights
+            </p>
+          </div>
+
+          <div className="ai-features-grid">
+            <div className="ai-feature-card">
+              <div className="ai-feature-icon">
+                <Brain size={32} />
+              </div>
+              <h3 className="ai-feature-title">Machine Learning Analysis</h3>
+              <p className="ai-feature-description">
+                Upload CSV sensor data and let our AI analyze patterns, detect anomalies, and calculate precise health scores based on machine-specific thresholds.
+              </p>
+              <ul className="ai-feature-list">
+                <li><CheckCircle2 size={16} /> Threshold-based health scoring</li>
+                <li><CheckCircle2 size={16} /> Anomaly detection algorithms</li>
+                <li><CheckCircle2 size={16} /> Stress pattern analysis</li>
+                <li><CheckCircle2 size={16} /> Trend prediction</li>
+              </ul>
+            </div>
+
+            <div className="ai-feature-card">
+              <div className="ai-feature-icon">
+                <FileText size={32} />
+              </div>
+              <h3 className="ai-feature-title">Professional Reports</h3>
+              <p className="ai-feature-description">
+                Generate detailed analysis reports with statistical insights, health assessments, and maintenance recommendations tailored to each machine.
+              </p>
+              <ul className="ai-feature-list">
+                <li><CheckCircle2 size={16} /> Comprehensive health metrics</li>
+                <li><CheckCircle2 size={16} /> Statistical analysis tables</li>
+                <li><CheckCircle2 size={16} /> Threshold configuration display</li>
+                <li><CheckCircle2 size={16} /> Historical trend visualization</li>
+              </ul>
+            </div>
+
+            <div className="ai-feature-card">
+              <div className="ai-feature-icon">
+                <Target size={32} />
+              </div>
+              <h3 className="ai-feature-title">Actionable Recommendations</h3>
+              <p className="ai-feature-description">
+                Receive priority-based maintenance recommendations with specific timelines and actions based on actual threshold violations and machine condition.
+              </p>
+              <ul className="ai-feature-list">
+                <li><CheckCircle2 size={16} /> Critical/High/Medium/Low priorities</li>
+                <li><CheckCircle2 size={16} /> Specific action timelines</li>
+                <li><CheckCircle2 size={16} /> Threshold-aware guidance</li>
+                <li><CheckCircle2 size={16} /> Root cause identification</li>
+              </ul>
+            </div>
+
+            <div className="ai-feature-card">
+              <div className="ai-feature-icon">
+                <Download size={32} />
+              </div>
+              <h3 className="ai-feature-title">Export & Share</h3>
+              <p className="ai-feature-description">
+                Download professional reports in PDF or Word format with Factory Pulse branding. All reports are saved to database with unique IDs for tracking.
+              </p>
+              <ul className="ai-feature-list">
+                <li><CheckCircle2 size={16} /> PDF & Word export options</li>
+                <li><CheckCircle2 size={16} /> Factory Pulse branding</li>
+                <li><CheckCircle2 size={16} /> Database storage with Report ID</li>
+                <li><CheckCircle2 size={16} /> Print-optimized layouts</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="ai-stats-row">
+            <div className="ai-stat-card">
+              <div className="ai-stat-value">97%+</div>
+              <div className="ai-stat-label">Accuracy</div>
+            </div>
+            <div className="ai-stat-card">
+              <div className="ai-stat-value">&lt;10s</div>
+              <div className="ai-stat-label">Analysis Time</div>
+            </div>
+            <div className="ai-stat-card">
+              <div className="ai-stat-value">100%</div>
+              <div className="ai-stat-label">Machine-Specific</div>
+            </div>
+            <div className="ai-stat-card">
+              <div className="ai-stat-value">24/7</div>
+              <div className="ai-stat-label">Available</div>
+            </div>
           </div>
         </div>
       </section>

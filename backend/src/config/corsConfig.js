@@ -2,10 +2,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const corsOptions = {
-  origin: process.env.CORS_ALLOWED_ORIGINS.split(','),
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
+  optionsSuccessStatus: 200,
   maxAge: 3600,
 };
 

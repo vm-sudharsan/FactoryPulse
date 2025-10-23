@@ -25,8 +25,7 @@ class SessionManager {
       lastActivity: new Date()
     });
     
-    console.log(`✅ Session added for user: ${userInfo.email}`);
-    console.log(`📊 Active sessions: ${this.activeSessions.size}`);
+    console.log(`Session added: ${userInfo.email} (Active: ${this.activeSessions.size})`);
   }
 
   /**
@@ -36,13 +35,11 @@ class SessionManager {
   removeSession(token) {
     const metadata = this.sessionMetadata.get(token);
     if (metadata) {
-      console.log(`🔴 Session removed for user: ${metadata.email}`);
+      console.log(`Session removed: ${metadata.email} (Active: ${this.activeSessions.size - 1})`);
     }
     
     this.activeSessions.delete(token);
     this.sessionMetadata.delete(token);
-    
-    console.log(`📊 Active sessions: ${this.activeSessions.size}`);
   }
 
   /**
@@ -97,7 +94,9 @@ class SessionManager {
     const count = this.activeSessions.size;
     this.activeSessions.clear();
     this.sessionMetadata.clear();
-    console.log(`🧹 Cleared ${count} sessions`);
+    if (count > 0) {
+      console.log(`Cleared ${count} sessions`);
+    }
   }
 
   /**
@@ -120,7 +119,7 @@ class SessionManager {
     }
     
     if (cleanedCount > 0) {
-      console.log(`🧹 Cleaned up ${cleanedCount} inactive sessions`);
+      console.log(`Cleaned up ${cleanedCount} inactive sessions`);
     }
   }
 

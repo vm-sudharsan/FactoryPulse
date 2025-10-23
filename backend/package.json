@@ -8,6 +8,10 @@
     "dev": "nodemon src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "keywords": [
     "IoT",
     "ThingSpeak",
@@ -23,8 +27,13 @@
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
+    "express-rate-limit": "^7.1.5",
+    "form-data": "^4.0.4",
+    "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.0",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2",
     "node-cron": "^3.0.3",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",

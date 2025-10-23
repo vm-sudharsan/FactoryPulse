@@ -8,6 +8,8 @@ import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import Dashboard from '../pages/Dashboard';
 import MachineDetails from '../pages/MachineDetails';
+import AIAnalysis from '../pages/AIAnalysis';
+import AnalysisReport from '../pages/AnalysisReport';
 import ManageMachines from '../pages/ManageMachines';
 import ManageOperators from '../pages/ManageOperators';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -31,6 +33,8 @@ const AppRouter = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/machine/:id" element={<MachineDetails />} />
+          <Route path="/ai-analysis" element={<AIAnalysis />} />
+          <Route path="/analysis-report" element={<AnalysisReport />} />
         </Route>
 
         <Route element={<ProtectedRoute ownerOnly={true} />}>

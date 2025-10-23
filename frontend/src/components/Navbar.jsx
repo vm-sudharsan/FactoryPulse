@@ -49,6 +49,13 @@ const Navbar = () => {
             Dashboard
           </Link>
           
+          <Link 
+            to="/ai-analysis" 
+            className={`navbar-link ${isActive('/ai-analysis') ? 'active' : ''}`}
+          >
+            AI Analysis
+          </Link>
+          
           {isOwner() && (
             <>
               <Link 
@@ -100,6 +107,15 @@ const Navbar = () => {
         >
           <Activity size={20} />
           <span>Dashboard</span>
+        </Link>
+        
+        <Link 
+          to="/ai-analysis" 
+          className={`mobile-menu-item ${isActive('/ai-analysis') ? 'active' : ''}`}
+          onClick={handleNavClick}
+        >
+          <Activity size={20} />
+          <span>AI Analysis</span>
         </Link>
         
         {isOwner() && (

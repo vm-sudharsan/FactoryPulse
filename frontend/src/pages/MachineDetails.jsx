@@ -21,6 +21,7 @@ const MachineDetails = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [downloadError, setDownloadError] = useState('');
+  const [csvFormat, setCsvFormat] = useState('standard'); // 'standard' or 'ai'
   const previousDataRef = useRef({ machine: null, recentData: null });
 
   useEffect(() => {
@@ -97,8 +98,8 @@ const MachineDetails = () => {
         return;
       }
 
-      // Download CSV
-      const response = await machineService.downloadCSV(id, startDate, endDate);
+      // Download CSV with selected format
+      const response = await machineService.downloadCSV(id, startDate, endDate, csvFormat);
       
       // Create blob and download
       const blob = new Blob([response.data], { type: 'text/csv' });
@@ -274,6 +275,30 @@ const MachineDetails = () => {
             <p className="download-description">
               Select a date range to download sensor readings for {machine?.name}
             </p>
+            
+            {/* CSV Format Toggle */}
+            <div className="csv-format-toggle">
+              <label className="format-label">CSV Format:</label>
+              <div className="toggle-switch-container">
+                <button
+                  className={`toggle-option ${csvFormat === 'standard' ? 'active' : ''}`}
+                  onClick={() => setCsvFormat('standard')}
+                >
+                  Standard
+                </button>
+                <button
+                  className={`toggle-option ${csvFormat === 'ai' ? 'active' : ''}`}
+                  onClick={() => setCsvFormat('ai')}
+                >
+                  AI Analysis
+                </button>
+              </div>
+              <p className="format-description">
+                {csvFormat === 'standard' 
+                  ? 'Includes timestamp and units (e.g., Temperature (°C))'
+                  : 'ML-ready format: lowercase headers (temperature, vibration, current)'}
+              </p>
+            </div>
             
             <div className="date-range-picker">
               <div className="date-input-group">

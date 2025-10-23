@@ -61,9 +61,9 @@ const machineService = {
     return response.data;
   },
 
-  downloadCSV: async (machineId, startDate, endDate) => {
+  downloadCSV: async (machineId, startDate, endDate, format = 'standard') => {
     const response = await api.get('/data/download-csv', {
-      params: { machineId, startDate, endDate },
+      params: { machineId, startDate, endDate, format },
       responseType: 'blob' // Important for file download
     });
     return response;
