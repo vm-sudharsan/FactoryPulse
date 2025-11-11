@@ -1,228 +1,179 @@
-/*
- * IoT Machine Monitoring System - ESP32 (Final v3.1)
- * --------------------------------------------------
- * Channel ID: 3054992
- * Read Key  : RR1GW7ETRAT8H0DE
- * Write Key : 37ZB71XBU3N9I2BE
- * 
- * Field1 = Temperature (°C)
- * Field2 = Vibration (V)
- * Field3 = Current (A)
- * Field4 = Machine Control (0=OFF, 1=ON)
- */
-
 #include <WiFi.h>
 #include <ThingSpeak.h>
 
-// ============================================================
-// WiFi Credentials - UPDATE THESE
-// ============================================================
-const char* ssid = "Your_WiFi_SSID";
-const char* password = "Your_WiFi_Password";
+const char* ssidList[] = {"Home Net - 2.4G", "MINION", "."};
+const char* passList[] = {"Password", "sudharsan$", "1234567890"};
+const int wifiCount = 3;
 
-// ============================================================
-// ThingSpeak Configuration
-// ============================================================
-unsigned long myChannelNumber = 3054992;
-const char* myWriteAPIKey = "37ZB71XBU3N9I2BE";
-const char* myReadAPIKey  = "RR1GW7ETRAT8H0DE";
+unsigned long channelid = 3054992;
+const char* writekey = "37ZB71XBU3N9I2BE";
+const char* readkey  = "RR1GW7ETRAT8H0DE";
 
-// ============================================================
-// Hardware Pins
-// ============================================================
-const int tempPin = 35;       // LM35 Temperature Sensor
-const int vibrationPin = 32;  // SW-420 Vibration Sensor
-const int currentPin = 34;    // ACS712 Current Sensor
-const int controlPin = 33;    // Relay/LED output
+const int temppin = 35;
+const int vibpin = 32;
+const int currpin = 34;
+const int controlpin = 33;
 
-// ============================================================
-// Sensor Calibration
-// ============================================================
-const float V_REF = 3.3;
-const int ADC_RES = 4095;
-const float ACS_SENS = 0.185;                     // 185mV per Amp
-const float ACS_ZERO = (1950.0 / 4095.0) * V_REF; // ~1.56V center
+const float voltref = 3.3;
+const int adcresolution = 4095;
+const float currentsensitivity = 0.185;
+const float currentzero = (1950.0 / 4095.0) * voltref;
 
-// ============================================================
-// Timing Intervals
-// ============================================================
-const unsigned long UPLOAD_INTERVAL = 60000;        // 60s
-const unsigned long CONTROL_INTERVAL = 10000;       // 10s
-unsigned long lastUpload = 0;
-unsigned long lastControlCheck = 0;
-unsigned long lastWiFiLog = 0;
+const unsigned long uploadinterval = 60000;
+const unsigned long controlinterval = 10000;
+unsigned long lastupload = 0;
+unsigned long lastcontrolcheck = 0;
+unsigned long lastwifilog = 0;
 
-// ============================================================
-// Globals
-// ============================================================
-bool machineState = false;
+bool machinestate = false;
 WiFiClient client;
 
-// ============================================================
-// WiFi Connection with Logging
-// ============================================================
-void connectWiFi() {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("📡 Connecting to WiFi...");
-    WiFi.begin(ssid, password);
-    int retry = 0;
-    while (WiFi.status() != WL_CONNECTED && retry < 30) {
-      delay(500);
-      Serial.print(".");
-      retry++;
+void connectwifi() {
+  if (WiFi.status() == WL_CONNECTED) {
+    if (millis() - lastwifilog >= 60000) {
+      lastwifilog = millis();
+      Serial.println("WiFi Connected");
     }
-    if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("\n✅ WiFi Connected!");
-      Serial.print("📶 Signal Strength (RSSI): ");
-      Serial.print(WiFi.RSSI());
-      Serial.println(" dBm");
-      Serial.print("🌐 IP Address: ");
-      Serial.println(WiFi.localIP());
-    } else {
-      Serial.println("\n❌ WiFi Connection Failed!");
+    return;
+  }
+
+  Serial.println("Scanning for available WiFi networks...");
+  int n = WiFi.scanNetworks();
+  if (n <= 0) {
+    Serial.println("No networks found");
+    return;
+  }
+
+  int bestIndex = -1;
+  int bestSignal = -1000;
+  for (int i = 0; i < wifiCount; i++) {
+    for (int j = 0; j < n; j++) {
+      if (WiFi.SSID(j) == ssidList[i]) {
+        int rssi = WiFi.RSSI(j);
+        if (rssi > bestSignal) {
+          bestSignal = rssi;
+          bestIndex = i;
+        }
+      }
     }
+  }
+
+  if (bestIndex == -1) {
+    Serial.println("No known networks found nearby");
+    return;
+  }
+
+  Serial.print("Connecting to best WiFi: ");
+  Serial.println(ssidList[bestIndex]);
+
+  WiFi.begin(ssidList[bestIndex], passList[bestIndex]);
+  int retry = 0;
+  while (WiFi.status() != WL_CONNECTED && retry < 30) {
+    delay(500);
+    Serial.print(".");
+    retry++;
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi Connected");
+    Serial.print("Connected to: ");
+    Serial.println(ssidList[bestIndex]);
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
   } else {
-    // Log WiFi health every 60s
-    if (millis() - lastWiFiLog >= 60000) {
-      lastWiFiLog = millis();
-      Serial.print("📶 WiFi still connected | RSSI: ");
-      Serial.print(WiFi.RSSI());
-      Serial.println(" dBm");
-    }
+    Serial.println("\nWiFi Connection Failed");
   }
 }
 
-// ============================================================
-// Read Control Signal (Field 4)
-// ============================================================
-bool readControlSignal() {
-  float val = ThingSpeak.readFloatField(myChannelNumber, 4, myReadAPIKey);
-  int statusCode = ThingSpeak.getLastReadStatus();
+bool readcontrolsignal() {
+  float val = ThingSpeak.readFloatField(channelid, 4, readkey);
+  int statuscode = ThingSpeak.getLastReadStatus();
 
-  if (statusCode == 200) {
-    Serial.print("🔹 Control Signal (Field 4): ");
-    Serial.println(val);
+  if (statuscode == 200) {
     return (val == 1.0);
   } else {
-    Serial.print("⚠️ ThingSpeak Read Error (HTTP ");
-    Serial.print(statusCode);
-    Serial.println(")");
-    return machineState;
+    return machinestate;
   }
 }
 
-// ============================================================
-// Update Machine State (GPIO33)
-// ============================================================
-void updateMachine(bool newState) {
-  if (newState != machineState) {
-    machineState = newState;
-    digitalWrite(controlPin, machineState ? HIGH : LOW);
-    Serial.println(machineState ? "⚙️ Machine Turned ON (GPIO33 HIGH)" : "🛑 Machine Turned OFF (GPIO33 LOW)");
+void updatemachine(bool newstate) {
+  if (newstate != machinestate) {
+    machinestate = newstate;
+    digitalWrite(controlpin, machinestate ? HIGH : LOW);
+    Serial.println(machinestate ? "Machine ON" : "Machine OFF");
   }
 }
 
-// ============================================================
-// Read Sensors with Logging
-// ============================================================
-void readSensors(float &temp, float &vib, float &curr) {
-  int rawT = analogRead(tempPin);
-  int rawV = analogRead(vibrationPin);
-  int rawC = analogRead(currentPin);
+void readsensors(float &temp, float &vib, float &curr) {
+  int rawtemp = analogRead(temppin);
+  int rawvibration = analogRead(vibpin);
+  int rawcurrent = analogRead(currpin);
 
-  float tVolt = (rawT * V_REF) / ADC_RES;
-  temp = tVolt / 0.01;  // LM35 → 10mV/°C
+  float tempvolt = (rawtemp * voltref) / adcresolution;
+  temp = tempvolt / 0.01;
 
-  vib = (rawV * V_REF) / ADC_RES;
+  vib = (rawvibration * voltref) / adcresolution;
 
-  float cVolt = (rawC * V_REF) / ADC_RES;
-  curr = (cVolt - ACS_ZERO) / ACS_SENS;
+  float currentvolt = (rawcurrent * voltref) / adcresolution;
+  curr = (currentvolt - currentzero) / currentsensitivity;
 
   if (temp < 0 || temp > 100) temp = 0;
   if (vib < 0 || vib > 3.3) vib = 0;
   if (abs(curr) < 0.05) curr = 0;
-
-  Serial.println("🌡️ Sensor Data:");
-  Serial.print("   ↳ Temperature: "); Serial.print(temp); Serial.println(" °C");
-  Serial.print("   ↳ Vibration: "); Serial.print(vib); Serial.println(" V");
-  Serial.print("   ↳ Current: "); Serial.print(curr); Serial.println(" A");
 }
 
-// ============================================================
-// Upload Sensor Data
-// ============================================================
-void uploadData(float temp, float vib, float curr) {
+void uploaddata(float temp, float vib, float curr) {
   ThingSpeak.setField(1, temp);
   ThingSpeak.setField(2, vib);
   ThingSpeak.setField(3, curr);
-
-  int res = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+  int res = ThingSpeak.writeFields(channelid, writekey);
   if (res == 200) {
-    Serial.println("✅ Data Uploaded Successfully to ThingSpeak");
+    Serial.println("Data Uploaded");
   } else {
-    Serial.print("⚠️ Upload Failed (HTTP ");
-    Serial.print(res);
-    Serial.println(")");
+    Serial.println("Upload Failed");
   }
 }
 
-// ============================================================
-// Setup
-// ============================================================
 void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("\n=== 🛰️ Machine Monitor v3.1 ===");
-
-  pinMode(controlPin, OUTPUT);
-  digitalWrite(controlPin, LOW);
-  Serial.println("GPIO33 initialized to LOW (Machine OFF)");
+  pinMode(controlpin, OUTPUT);
+  digitalWrite(controlpin, HIGH);
+  Serial.println("System Init");
 
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
-  connectWiFi();
+  connectwifi();
 
+  delay(2000);
   ThingSpeak.begin(client);
 
-  machineState = readControlSignal();
-  updateMachine(machineState);
+  machinestate = readcontrolsignal();
+  updatemachine(machinestate);
 
-  Serial.println("✅ System Ready\n");
+  Serial.println("System Ready");
 }
 
-// ============================================================
-// Main Loop
-// ============================================================
 void loop() {
   unsigned long now = millis();
+  connectwifi();
 
-  connectWiFi();
-
-  // Control check every 10s
-  if (now - lastControlCheck >= CONTROL_INTERVAL) {
-    lastControlCheck = now;
-    bool newState = readControlSignal();
-    updateMachine(newState);
+  if (now - lastcontrolcheck >= controlinterval) {
+    lastcontrolcheck = now;
+    bool newstate = readcontrolsignal();
+    updatemachine(newstate);
   }
 
-  // Upload data every 60s
-  if (now - lastUpload >= UPLOAD_INTERVAL) {
-    lastUpload = now;
-
+  if (now - lastupload >= uploadinterval) {
+    lastupload = now;
     float temp, vib, curr;
-    if (machineState) {
-      // Machine ON - read real sensor values
-      readSensors(temp, vib, curr);
+    if (machinestate) {
+      readsensors(temp, vib, curr);
     } else {
-      // Machine OFF - read sensors but send zeros
-      Serial.println("🕹️ Machine OFF → Reading sensors but sending zeros");
-      readSensors(temp, vib, curr);
-      Serial.println("📤 Overriding with zeros for upload");
       temp = 0; vib = 0; curr = 0;
     }
-
-    uploadData(temp, vib, curr);
+    uploaddata(temp, vib, curr);
   }
 
   delay(100);
